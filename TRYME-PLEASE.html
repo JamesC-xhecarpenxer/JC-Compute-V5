@@ -1,0 +1,4429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOVEREIGN OS — ProofCompute · JES · Trinity · Distributed Intelligence</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Syne:wght@700;800&family=Chivo:wght@400;700;900&display=swap');
+
+        :root {
+            --void: #000000;
+            --deep: #050508;
+            --panel: #0a0a0f;
+            --card: #0f0f1a;
+            --border: #1a1a2e;
+            --accent: #00ff88;
+            --accent2: #00ccff;
+            --accent3: #ff6600;
+            --accent4: #9900ff;
+            --warn: #ffcc00;
+            --text: #e8e8f0;
+            --muted: #8888aa;
+            --proof-green: #00ff88;
+            --ledger-blue: #00ccff;
+            --event-orange: #ff6600;
+            --compute-purple: #9900ff;
+            --reward-gold: #ffcc00;
+            --r: 12px;
+            --r2: 8px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--void);
+            color: var(--text);
+            font-family: 'Chivo', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* === EVENT BAR === */
+        #event-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 36px;
+            background: #050510;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        #event-bar-label {
+            flex-shrink: 0;
+            padding: 0 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            border-right: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        #event-ticker {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        #event-track {
+            display: flex;
+            gap: 0;
+            white-space: nowrap;
+            animation: ticker-scroll 30s linear infinite;
+            will-change: transform;
+        }
+
+        @keyframes ticker-scroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .event-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 20px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            border-right: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .event-item .evt-type {
+            font-weight: 700;
+        }
+
+        .event-item.proof {
+            color: var(--proof-green);
+        }
+
+        .event-item.ledger {
+            color: var(--ledger-blue);
+        }
+
+        .event-item.compute {
+            color: var(--compute-purple);
+        }
+
+        .event-item.reward {
+            color: var(--reward-gold);
+        }
+
+        .event-item.network {
+            color: var(--accent2);
+        }
+
+        .event-item.message {
+            color: var(--text);
+        }
+
+        #event-stats {
+            flex-shrink: 0;
+            padding: 0 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            border-left: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        /* === NAVIGATION === */
+        #nav {
+            position: fixed;
+            top: 36px;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: rgba(5, 5, 15, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 999;
+        }
+
+        #nav-logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            color: var(--text);
+        }
+
+        #nav-logo span {
+            color: var(--accent);
+        }
+
+        #nav-tabs {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-tab {
+            padding: 6px 14px;
+            border-radius: var(--r2);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid transparent;
+            color: var(--muted);
+            background: transparent;
+        }
+
+        .nav-tab:hover {
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .nav-tab.active {
+            color: var(--void);
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        #nav-status {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        /* === LAYOUT === */
+        #app {
+            padding-top: 92px;
+            min-height: 100vh;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* === DASHBOARD PAGE === */
+        #page-dashboard {
+            padding: 24px;
+        }
+
+        .dash-hero {
+            background: linear-gradient(135deg, #000510 0%, #050520 50%, #000510 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 40px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dash-hero::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .dash-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -100px;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 204, 255, 0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+
+        .hero-title .hl {
+            color: var(--accent);
+        }
+
+        .hero-sub {
+            font-size: 16px;
+            color: var(--muted);
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .hero-cids {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .cid-chip {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid;
+        }
+
+        .cid-chip.green {
+            color: var(--proof-green);
+            border-color: rgba(0, 255, 136, 0.3);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .cid-chip.blue {
+            color: var(--ledger-blue);
+            border-color: rgba(0, 204, 255, 0.3);
+            background: rgba(0, 204, 255, 0.05);
+        }
+
+        .cid-chip.orange {
+            color: var(--event-orange);
+            border-color: rgba(255, 102, 0, 0.3);
+            background: rgba(255, 102, 0, 0.05);
+        }
+
+        .cid-chip.purple {
+            color: var(--compute-purple);
+            border-color: rgba(153, 0, 255, 0.3);
+            background: rgba(153, 0, 255, 0.05);
+        }
+
+        .cid-chip.gold {
+            color: var(--reward-gold);
+            border-color: rgba(255, 204, 0, 0.3);
+            background: rgba(255, 204, 0, 0.05);
+        }
+
+        /* Metrics grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .metric-card:hover {
+            border-color: var(--accent);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .metric-card.green::before {
+            background: var(--proof-green);
+        }
+
+        .metric-card.blue::before {
+            background: var(--ledger-blue);
+        }
+
+        .metric-card.orange::before {
+            background: var(--event-orange);
+        }
+
+        .metric-card.purple::before {
+            background: var(--compute-purple);
+        }
+
+        .metric-card.gold::before {
+            background: var(--reward-gold);
+        }
+
+        .metric-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .metric-card.green .metric-value {
+            color: var(--proof-green);
+        }
+
+        .metric-card.blue .metric-value {
+            color: var(--ledger-blue);
+        }
+
+        .metric-card.orange .metric-value {
+            color: var(--event-orange);
+        }
+
+        .metric-card.purple .metric-value {
+            color: var(--compute-purple);
+        }
+
+        .metric-card.gold .metric-value {
+            color: var(--reward-gold);
+        }
+
+        .metric-sub {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        /* Two column layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--text);
+        }
+
+        .panel-badge {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .panel-badge.live {
+            color: var(--proof-green);
+            background: rgba(0, 255, 136, 0.1);
+            animation: pulse 2s infinite;
+        }
+
+        .panel-badge.proof {
+            color: var(--proof-green);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .panel-badge.verified {
+            color: var(--ledger-blue);
+            background: rgba(0, 204, 255, 0.1);
+        }
+
+        .panel-body {
+            padding: 20px;
+        }
+
+        /* === LEDGER / BLOCKCHAIN VIEW === */
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+        }
+
+        .ledger-table th {
+            text-align: left;
+            padding: 8px 12px;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--border);
+            font-size: 10px;
+        }
+
+        .ledger-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(26, 26, 46, 0.5);
+            vertical-align: middle;
+        }
+
+        .ledger-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .ledger-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .hash-short {
+            color: var(--accent2);
+            cursor: pointer;
+        }
+
+        .hash-short:hover {
+            text-decoration: underline;
+        }
+
+        .tx-type {
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+        }
+
+        .tx-type.proof {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--proof-green);
+        }
+
+        .tx-type.event {
+            background: rgba(255, 102, 0, 0.15);
+            color: var(--event-orange);
+        }
+
+        .tx-type.ledger {
+            background: rgba(0, 204, 255, 0.15);
+            color: var(--ledger-blue);
+        }
+
+        .tx-type.reward {
+            background: rgba(255, 204, 0, 0.15);
+            color: var(--reward-gold);
+        }
+
+        .tx-type.compute {
+            background: rgba(153, 0, 255, 0.15);
+            color: var(--compute-purple);
+        }
+
+        .tx-type.message {
+            background: rgba(232, 232, 240, 0.1);
+            color: var(--text);
+        }
+
+        /* === PROOF COMPUTE === */
+        #page-proofcompute {
+            padding: 24px;
+        }
+
+        .proof-flow-diagram {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 32px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .flow-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .flow-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            border: 2px solid;
+        }
+
+        .flow-icon.green {
+            border-color: var(--proof-green);
+            background: rgba(0, 255, 136, 0.08);
+        }
+
+        .flow-icon.blue {
+            border-color: var(--ledger-blue);
+            background: rgba(0, 204, 255, 0.08);
+        }
+
+        .flow-icon.orange {
+            border-color: var(--event-orange);
+            background: rgba(255, 102, 0, 0.08);
+        }
+
+        .flow-icon.purple {
+            border-color: var(--compute-purple);
+            background: rgba(153, 0, 255, 0.08);
+        }
+
+        .flow-icon.gold {
+            border-color: var(--reward-gold);
+            background: rgba(255, 204, 0, 0.08);
+        }
+
+        .flow-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            font-size: 24px;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+
+        /* Code runner */
+        .code-runner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .code-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+        }
+
+        .code-toolbar {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .code-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+        }
+
+        .code-btn {
+            padding: 5px 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            transition: all 0.15s;
+            background: var(--accent);
+            color: var(--void);
+        }
+
+        .code-btn:hover {
+            background: #00cc66;
+        }
+
+        .code-btn:disabled {
+            background: var(--border);
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
+        .code-btn.secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .code-btn.secondary:hover {
+            background: #2a2a40;
+        }
+
+        .code-editor {
+            width: 100%;
+            background: var(--deep);
+            border: none;
+            padding: 16px;
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 220px;
+            outline: none;
+        }
+
+        .proof-output {
+            padding: 16px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            line-height: 1.8;
+            min-height: 220px;
+            background: var(--deep);
+        }
+
+        .proof-line {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .proof-key {
+            color: var(--muted);
+            flex-shrink: 0;
+            min-width: 120px;
+        }
+
+        .proof-val {
+            color: var(--text);
+            word-break: break-all;
+        }
+
+        .proof-val.cid {
+            color: var(--ledger-blue);
+        }
+
+        .proof-val.hash {
+            color: var(--proof-green);
+        }
+
+        .proof-val.bool-true {
+            color: var(--proof-green);
+        }
+
+        .proof-val.bool-false {
+            color: var(--event-orange);
+        }
+
+        .proof-val.num {
+            color: var(--compute-purple);
+        }
+
+        /* === LEDGER PAGE === */
+        #page-ledger {
+            padding: 24px;
+        }
+
+        /* === MESSAGING PAGE === */
+        #page-messaging {
+            padding: 24px;
+        }
+
+        .message-channels {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 16px;
+            height: calc(100vh - 160px);
+        }
+
+        .channel-list {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .channel-search {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .channel-input {
+            width: 100%;
+            background: var(--deep);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            outline: none;
+        }
+
+        .channel-input:focus {
+            border-color: var(--accent);
+        }
+
+        .channel-items {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .channel-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(26, 26, 46, 0.5);
+            cursor: pointer;
+            transition: background 0.1s;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .channel-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .channel-item.active {
+            background: rgba(0, 255, 136, 0.05);
+            border-left: 2px solid var(--accent);
+        }
+
+        .channel-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .channel-preview {
+            font-size: 11px;
+            color: var(--muted);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .channel-badge {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .channel-unread {
+            background: var(--accent);
+            color: var(--void);
+            font-size: 9px;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 10px;
+        }
+
+        .message-area {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .message-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .message-thread {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message-bubble {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-width: 80%;
+        }
+
+        .message-bubble.mine {
+            align-self: flex-end;
+        }
+
+        .bubble-meta {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .bubble-meta.mine {
+            justify-content: flex-end;
+        }
+
+        .bubble-content {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .message-bubble.other .bubble-content {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .message-bubble.mine .bubble-content {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            color: var(--text);
+        }
+
+        .bubble-proof {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            color: var(--proof-green);
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.15);
+            cursor: pointer;
+        }
+
+        .message-composer {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+
+        .compose-input {
+            flex: 1;
+            background: var(--deep);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--text);
+            font-family: 'Chivo', sans-serif;
+            font-size: 13px;
+            outline: none;
+            resize: none;
+            height: 48px;
+        }
+
+        .compose-input:focus {
+            border-color: var(--accent);
+        }
+
+        .compose-send {
+            padding: 0 24px;
+            background: var(--accent);
+            color: var(--void);
+            border: none;
+            border-radius: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .compose-send:hover {
+            background: #00cc66;
+        }
+
+        /* === APP BUILDER === */
+        #page-builder {
+            padding: 24px;
+        }
+
+        .builder-grid {
+            display: grid;
+            grid-template-columns: 260px 1fr 320px;
+            gap: 16px;
+            height: calc(100vh - 160px);
+        }
+
+        .components-panel,
+        .canvas-panel,
+        .props-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .component-item {
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(26, 26, 46, 0.5);
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            transition: background 0.1s;
+        }
+
+        .component-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .component-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .canvas-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background: var(--deep);
+            position: relative;
+        }
+
+        .canvas-drop-hint {
+            border: 2px dashed var(--border);
+            border-radius: var(--r);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--muted);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* === ECONOMY / REWARDS === */
+        #page-economy {
+            padding: 24px;
+        }
+
+        .reward-staircase {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 32px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .staircase-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            color: var(--text);
+        }
+
+        .stairs {
+            display: flex;
+            align-items: flex-end;
+            gap: 0;
+            height: 200px;
+        }
+
+        .stair {
+            flex: 1;
+            border-radius: var(--r2) var(--r2) 0 0;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding-top: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid;
+            border-bottom: none;
+        }
+
+        .stair:hover {
+            filter: brightness(1.2);
+        }
+
+        .stair-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-align: center;
+            position: absolute;
+            bottom: -30px;
+            white-space: nowrap;
+        }
+
+        .stair-val {
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .stair.s1 {
+            height: 60px;
+            background: rgba(255, 204, 0, 0.08);
+            border-color: rgba(255, 204, 0, 0.3);
+            color: var(--reward-gold);
+        }
+
+        .stair.s2 {
+            height: 85px;
+            background: rgba(255, 204, 0, 0.12);
+            border-color: rgba(255, 204, 0, 0.4);
+            color: var(--reward-gold);
+        }
+
+        .stair.s3 {
+            height: 110px;
+            background: rgba(255, 204, 0, 0.16);
+            border-color: rgba(255, 204, 0, 0.5);
+            color: var(--reward-gold);
+        }
+
+        .stair.s4 {
+            height: 140px;
+            background: rgba(255, 204, 0, 0.20);
+            border-color: rgba(255, 204, 0, 0.6);
+            color: var(--reward-gold);
+        }
+
+        .stair.s5 {
+            height: 170px;
+            background: rgba(255, 204, 0, 0.25);
+            border-color: rgba(255, 204, 0, 0.7);
+            color: var(--reward-gold);
+        }
+
+        .stair.s6 {
+            height: 200px;
+            background: rgba(255, 204, 0, 0.30);
+            border-color: var(--reward-gold);
+            color: var(--reward-gold);
+        }
+
+        .stair.active {
+            filter: brightness(1.3);
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
+        }
+
+        /* Wallet */
+        .wallet-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .wallet-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wallet-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            border-radius: 0 var(--r) 0 80px;
+        }
+
+        .wallet-card.proof-card::after {
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .wallet-card.compute-card::after {
+            background: rgba(153, 0, 255, 0.05);
+        }
+
+        .wallet-card.reward-card::after {
+            background: rgba(255, 204, 0, 0.05);
+        }
+
+        /* File/Video sharing */
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .media-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .media-card:hover {
+            border-color: var(--accent2);
+            transform: translateY(-2px);
+        }
+
+        .media-thumb {
+            height: 120px;
+            background: var(--panel);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            position: relative;
+        }
+
+        .media-overlay {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--proof-green);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .media-info {
+            padding: 12px;
+        }
+
+        .media-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .media-meta {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--muted);
+            display: flex;
+            gap: 8px;
+        }
+
+        /* === COLLABORATION PAGE === */
+        #page-collab {
+            padding: 24px;
+        }
+
+        .collab-header {
+            margin-bottom: 24px;
+        }
+
+        .collab-workspace {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .collab-editor {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .collab-cursors {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .cursor-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            border: 2px solid;
+            cursor: default;
+            position: relative;
+        }
+
+        .cursor-avatar::after {
+            content: attr(data-name);
+            position: absolute;
+            top: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            font-weight: 600;
+            background: var(--panel);
+            padding: 2px 6px;
+            border-radius: 4px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+        }
+
+        .cursor-avatar:hover::after {
+            opacity: 1;
+        }
+
+        .collab-code {
+            flex: 1;
+            background: var(--deep);
+            padding: 20px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            line-height: 1.7;
+            overflow-y: auto;
+            min-height: 400px;
+            outline: none;
+            color: var(--text);
+            white-space: pre;
+        }
+
+        .collab-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Node network visualization */
+        .node-graph {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+        }
+
+        .node-canvas {
+            width: 100%;
+            height: 200px;
+            display: block;
+        }
+
+        /* Distributed ledger visualization */
+        .dag-viz {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .dag-chain {
+            display: flex;
+            gap: 0;
+            align-items: center;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .dag-block {
+            flex-shrink: 0;
+            width: 72px;
+            padding: 10px 8px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .dag-block:hover {
+            border-color: var(--accent);
+        }
+
+        .dag-block.latest {
+            border-color: var(--proof-green);
+            box-shadow: 0 0 12px rgba(0, 255, 136, 0.15);
+        }
+
+        .dag-block-hash {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 8px;
+            color: var(--ledger-blue);
+            text-align: center;
+            overflow: hidden;
+            width: 100%;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dag-block-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .dag-block-type {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 7px;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+        }
+
+        .dag-arrow {
+            flex-shrink: 0;
+            font-size: 16px;
+            color: var(--muted);
+            padding: 0 4px;
+        }
+
+        /* === SCROLLBARS === */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--deep);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
+        }
+
+        /* === RESPONSIVE FIXES === */
+        @media (max-width: 900px) {
+
+            .two-col,
+            .three-col,
+            .code-runner {
+                grid-template-columns: 1fr;
+            }
+
+            .builder-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .message-channels {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .wallet-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .collab-workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 32px;
+            }
+        }
+
+        /* === ANIMATIONS === */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page.active>* {
+            animation: fadeIn 0.25s ease forwards;
+        }
+
+        /* === TOAST NOTIFICATIONS === */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 9999;
+        }
+
+        .toast {
+            padding: 12px 20px;
+            border-radius: var(--r2);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid;
+            animation: toastIn 0.2s ease;
+            max-width: 320px;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast.success {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.3);
+            color: var(--proof-green);
+        }
+
+        .toast.info {
+            background: rgba(0, 204, 255, 0.1);
+            border-color: rgba(0, 204, 255, 0.3);
+            color: var(--ledger-blue);
+        }
+
+        .toast.warn {
+            background: rgba(255, 204, 0, 0.1);
+            border-color: rgba(255, 204, 0, 0.3);
+            color: var(--warn);
+        }
+
+        /* Modal */
+        #modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 32px;
+            max-width: 560px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--muted);
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+            border-color: var(--text);
+        }
+
+        .modal-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+
+        .modal-body {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            line-height: 1.8;
+            color: var(--text);
+        }
+
+        .modal-body .key {
+            color: var(--muted);
+        }
+
+        .modal-body .val {
+            color: var(--proof-green);
+        }
+
+        .modal-body .val.blue {
+            color: var(--ledger-blue);
+        }
+
+        .col-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            margin-bottom: 6px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--r2);
+            border: none;
+            cursor: pointer;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            transition: all 0.15s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--void);
+        }
+
+        .btn-primary:hover {
+            background: #00cc66;
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #2a2a40;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            background: var(--deep);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            border-color: var(--accent);
+        }
+
+        /* Merkle tree viz */
+        .merkle-viz {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            line-height: 1.8;
+            color: var(--text);
+            padding: 16px;
+        }
+
+        .merkle-root {
+            color: var(--proof-green);
+            font-weight: 700;
+        }
+
+        .merkle-leaf {
+            color: var(--ledger-blue);
+        }
+
+        .merkle-link {
+            color: var(--muted);
+        }
+
+        /* Node status ring */
+        .node-ring {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 16px;
+        }
+
+        .node-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 8px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--r2);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .node-status:hover {
+            border-color: var(--accent);
+        }
+
+        .node-status.online {
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .node-status.syncing {
+            border-color: rgba(255, 204, 0, 0.3);
+        }
+
+        .node-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .node-indicator.online {
+            background: var(--proof-green);
+            box-shadow: 0 0 6px var(--proof-green);
+            animation: pulse 2s infinite;
+        }
+
+        .node-indicator.syncing {
+            background: var(--warn);
+            animation: pulse 1s infinite;
+        }
+
+        .node-indicator.offline {
+            background: var(--muted);
+        }
+
+        .node-id {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 0.05em;
+        }
+
+        .node-latency {
+            font-size: 8px;
+            color: var(--muted);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- EVENT BAR -->
+    <div id="event-bar">
+        <div id="event-bar-label">⚡ DISTRIBUTED EVENTS</div>
+        <div id="event-ticker">
+            <div id="event-track"></div>
+        </div>
+        <div id="event-stats">
+            <span id="evt-count">0</span> events · <span id="tps-rate">0</span> TPS
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <nav id="nav">
+        <div id="nav-logo">SOVEREIGN<span>OS</span></div>
+        <div id="nav-tabs">
+            <button class="nav-tab active" onclick="switchPage('dashboard')">DASHBOARD</button>
+            <button class="nav-tab" onclick="switchPage('proofcompute')">PROOF·COMPUTE</button>
+            <button class="nav-tab" onclick="switchPage('ledger')">LEDGER</button>
+            <button class="nav-tab" onclick="switchPage('messaging')">MESSAGING</button>
+            <button class="nav-tab" onclick="switchPage('collab')">COLLABORATE</button>
+            <button class="nav-tab" onclick="switchPage('builder')">APP·BUILDER</button>
+            <button class="nav-tab" onclick="switchPage('economy')">ECONOMY</button>
+        </div>
+        <div id="nav-status">
+            <span class="status-dot" style="background:var(--proof-green)" title="Proof Engine"></span>
+            <span style="color:var(--muted)">PROOF</span>
+            <span class="status-dot" style="background:var(--ledger-blue)" title="Ledger"></span>
+            <span style="color:var(--muted)">LEDGER</span>
+            <span class="status-dot" style="background:var(--event-orange)" title="Events"></span>
+            <span style="color:var(--muted)">EVENTS</span>
+        </div>
+    </nav>
+
+    <!-- APP -->
+    <div id="app">
+
+        <!-- === DASHBOARD PAGE === -->
+        <div id="page-dashboard" class="page active">
+            <div class="dash-hero">
+                <div class="hero-title">Distributed Intelligence.<br>Every Computation <span class="hl">Proven.</span></div>
+                <div class="hero-sub">ProofCompute + JES + Trinity — a sovereign stack where every event is hashed, every computation produces a CID, and every node in the mesh validates independently.</div>
+                <div class="hero-cids">
+                    <span class="cid-chip green" id="live-input-cid">INPUT · cid:sha256:loading...</span>
+                    <span class="cid-chip blue" id="live-output-cid">OUTPUT · cid:sha256:loading...</span>
+                    <span class="cid-chip orange" id="live-merkle-cid">MERKLE · cid:sha256:loading...</span>
+                    <span class="cid-chip purple" id="live-dag-cid">DAG · cid:sha256:loading...</span>
+                    <span class="cid-chip gold" id="live-block-num">BLOCK #0</span>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card green">
+                    <div class="metric-label">PROOFS GENERATED</div>
+                    <div class="metric-value" id="m-proofs">0</div>
+                    <div class="metric-sub">deterministic · verifiable</div>
+                </div>
+                <div class="metric-card blue">
+                    <div class="metric-label">LEDGER ENTRIES</div>
+                    <div class="metric-value" id="m-entries">0</div>
+                    <div class="metric-sub">cryptographically linked</div>
+                </div>
+                <div class="metric-card orange">
+                    <div class="metric-label">EVENTS DISPATCHED</div>
+                    <div class="metric-value" id="m-events">0</div>
+                    <div class="metric-sub">distributed across nodes</div>
+                </div>
+                <div class="metric-card purple">
+                    <div class="metric-label">COMPUTE UNITS</div>
+                    <div class="metric-value" id="m-compute">0</div>
+                    <div class="metric-sub">JSONFlow executions</div>
+                </div>
+                <div class="metric-card gold">
+                    <div class="metric-label">REWARD BALANCE</div>
+                    <div class="metric-value" id="m-balance">0</div>
+                    <div class="metric-sub">SOVA tokens earned</div>
+                </div>
+                <div class="metric-card blue">
+                    <div class="metric-label">ACTIVE NODES</div>
+                    <div class="metric-value" id="m-nodes">8</div>
+                    <div class="metric-sub">mesh participants</div>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <!-- Live ledger -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">DISTRIBUTED LEDGER — LIVE</div>
+                        <span class="panel-badge live">LIVE</span>
+                    </div>
+                    <div style="overflow-x:auto">
+                        <table class="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>TYPE</th>
+                                    <th>CID</th>
+                                    <th>PAYLOAD</th>
+                                    <th>PROOF</th>
+                                </tr>
+                            </thead>
+                            <tbody id="live-ledger-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- DAG Chain -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">DAG CHAIN — PROOF TREE</div>
+                        <span class="panel-badge proof">MERKLE</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="dag-chain" id="dag-chain-viz"></div>
+                        <div style="margin-top:16px">
+                            <div class="col-label">MERKLE TREE STRUCTURE</div>
+                            <div class="merkle-viz" id="merkle-tree-display"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Distributed Node Ring -->
+            <div class="panel" style="margin-bottom:24px">
+                <div class="panel-header">
+                    <div class="panel-title">DISTRIBUTED NODE MESH — INTELLIGENCE LAYER</div>
+                    <span class="panel-badge verified">P2P GOSSIP</span>
+                </div>
+                <div class="node-ring" id="node-ring"></div>
+            </div>
+        </div>
+
+        <!-- === PROOF COMPUTE PAGE === -->
+        <div id="page-proofcompute" class="page">
+            <div class="proof-flow-diagram">
+                <div class="flow-stage">
+                    <div class="flow-icon green">📝</div>
+                    <div class="flow-label">EVENTS<br>INPUT</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-stage">
+                    <div class="flow-icon blue">⚙️</div>
+                    <div class="flow-label">REDUCER<br>EXECUTION</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-stage">
+                    <div class="flow-icon orange">🔐</div>
+                    <div class="flow-label">SHA256<br>CANONICAL</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-stage">
+                    <div class="flow-icon purple">🌲</div>
+                    <div class="flow-label">MERKLE<br>DAG ROOT</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-stage">
+                    <div class="flow-icon gold">✅</div>
+                    <div class="flow-label">PROOF<br>CID</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-stage">
+                    <div class="flow-icon green">🔁</div>
+                    <div class="flow-label">VERIFY<br>ANYWHERE</div>
+                </div>
+            </div>
+
+            <div class="code-runner">
+                <div class="code-panel">
+                    <div class="code-toolbar">
+                        <div class="code-label">JSONFLOW PROGRAM</div>
+                        <div style="display:flex;gap:8px">
+                            <button class="code-btn secondary" onclick="loadExample('ledger')">LEDGER</button>
+                            <button class="code-btn secondary" onclick="loadExample('kv')">KEY-VALUE</button>
+                            <button class="code-btn secondary" onclick="loadExample('sum')">SUM</button>
+                            <button class="code-btn" onclick="executeProof()" id="run-btn">▶ RUN + PROVE</button>
+                        </div>
+                    </div>
+                    <textarea class="code-editor" id="flow-editor" spellcheck="false">{
+  "reducer": "core/ledger",
+  "initialState": {
+    "entries": [],
+    "balance": 0
+  },
+  "events": [
+    {
+      "type": "entry",
+      "id": "dep-1",
+      "entryType": "deposit",
+      "amount": 10000,
+      "description": "Initial deposit"
+    },
+    {
+      "type": "entry",
+      "id": "pay-1",
+      "entryType": "payment",
+      "amount": -2500,
+      "description": "Service fee"
+    },
+    {
+      "type": "entry",
+      "id": "rew-1",
+      "entryType": "reward",
+      "amount": 500,
+      "description": "Proof-compute reward"
+    }
+  ]
+}</textarea>
+                </div>
+                <div class="code-panel">
+                    <div class="code-toolbar">
+                        <div class="code-label">PROOF OUTPUT</div>
+                        <div style="display:flex;gap:8px">
+                            <button class="code-btn secondary" onclick="verifyLastProof()">VERIFY</button>
+                            <button class="code-btn secondary" onclick="copyProof()">COPY CID</button>
+                        </div>
+                    </div>
+                    <div class="proof-output" id="proof-output">
+                        <div style="color:var(--muted);font-size:12px">
+                            Press "RUN + PROVE" to execute and generate a cryptographic proof.<br><br>
+                            Every computation produces:<br>
+                            · inputCid — hash of your events<br>
+                            · outputCid — hash of final state<br>
+                            · dagRootCid — merkle root of all steps<br>
+                            · proof.v — version 1 proof object<br><br>
+                            <span style="color:var(--proof-green)">Same input → same CID, always, everywhere.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reducer Registry -->
+            <div class="panel" style="margin-bottom:24px">
+                <div class="panel-header">
+                    <div class="panel-title">REDUCER REGISTRY — JES ENGINE</div>
+                    <button class="btn btn-primary btn-sm" onclick="registerReducer()">+ REGISTER</button>
+                </div>
+                <div style="overflow-x:auto">
+                    <table class="ledger-table">
+                        <thead>
+                            <tr>
+                                <th>REDUCER ID</th>
+                                <th>STATE SHAPE</th>
+                                <th>EVENTS</th>
+                                <th>DETERMINISTIC</th>
+                                <th>LAST CID</th>
+                                <th>RUNS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reducer-registry-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Proof History -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">PROOF HISTORY — IMMUTABLE LOG</div>
+                    <button class="btn btn-secondary btn-sm" onclick="clearHistory()">CLEAR</button>
+                </div>
+                <div style="overflow-x:auto">
+                    <table class="ledger-table">
+                        <thead>
+                            <tr>
+                                <th>TIME</th>
+                                <th>REDUCER</th>
+                                <th>EVENTS</th>
+                                <th>INPUT CID</th>
+                                <th>OUTPUT CID</th>
+                                <th>DAG ROOT</th>
+                                <th>VALID</th>
+                            </tr>
+                        </thead>
+                        <tbody id="proof-history-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- === LEDGER PAGE === -->
+        <div id="page-ledger" class="page">
+            <div class="two-col" style="margin-bottom:24px">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">ADD LEDGER ENTRY</div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <label>ENTRY TYPE</label>
+                            <select id="entry-type">
+                                <option value="deposit">DEPOSIT</option>
+                                <option value="payment">PAYMENT</option>
+                                <option value="reward">REWARD</option>
+                                <option value="fee">FEE</option>
+                                <option value="transfer">TRANSFER</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>AMOUNT (integer minor units)</label>
+                            <input type="number" id="entry-amount" value="1000" placeholder="Amount...">
+                        </div>
+                        <div class="input-group">
+                            <label>DESCRIPTION</label>
+                            <input type="text" id="entry-desc" value="Manual entry" placeholder="Description...">
+                        </div>
+                        <button class="btn btn-primary" onclick="addLedgerEntry()" style="width:100%">POST TO LEDGER + PROVE</button>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">LEDGER STATE</div>
+                        <span class="panel-badge proof">PROVEN</span>
+                    </div>
+                    <div class="panel-body" id="ledger-state-display">
+                        <div class="proof-line"><span class="proof-key">balance:</span><span class="proof-val num" id="ls-balance">0</span></div>
+                        <div class="proof-line"><span class="proof-key">entries:</span><span class="proof-val num" id="ls-count">0</span></div>
+                        <div class="proof-line"><span class="proof-key">deposits:</span><span class="proof-val num" id="ls-deposits">0</span></div>
+                        <div class="proof-line"><span class="proof-key">payments:</span><span class="proof-val num" id="ls-payments">0</span></div>
+                        <div class="proof-line"><span class="proof-key">rewards:</span><span class="proof-val num" id="ls-rewards">0</span></div>
+                        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+                            <div class="proof-line"><span class="proof-key">stateCid:</span><span class="proof-val cid" id="ls-cid">—</span></div>
+                            <div class="proof-line"><span class="proof-key">dagRoot:</span><span class="proof-val hash" id="ls-dag">—</span></div>
+                            <div class="proof-line"><span class="proof-key">verified:</span><span class="proof-val bool-true" id="ls-verified">—</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">FULL LEDGER — CRYPTOGRAPHIC CHAIN</div>
+                    <div style="display:flex;gap:8px">
+                        <button class="btn btn-secondary btn-sm" onclick="exportLedger()">EXPORT JSON</button>
+                        <button class="btn btn-secondary btn-sm" onclick="replayLedger()">REPLAY ALL</button>
+                    </div>
+                </div>
+                <div style="overflow-x:auto">
+                    <table class="ledger-table">
+                        <thead>
+                            <tr>
+                                <th>SEQ</th>
+                                <th>TYPE</th>
+                                <th>AMOUNT</th>
+                                <th>DESCRIPTION</th>
+                                <th>EVENT CID</th>
+                                <th>STATE CID</th>
+                                <th>PREV STATE</th>
+                                <th>BALANCE</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledger-full-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- === MESSAGING PAGE === -->
+        <div id="page-messaging" class="page">
+            <div class="message-channels">
+                <div class="channel-list">
+                    <div class="panel-header">
+                        <div class="panel-title">CHANNELS</div>
+                        <button class="btn btn-primary btn-sm" onclick="newChannel()">+</button>
+                    </div>
+                    <div class="channel-search">
+                        <input class="channel-input" placeholder="Search channels..." oninput="filterChannels(this.value)">
+                    </div>
+                    <div class="channel-items" id="channel-list-items"></div>
+                </div>
+                <div class="message-area">
+                    <div class="message-header">
+                        <div>
+                            <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700" id="active-channel-name"># general</div>
+                            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)" id="active-channel-proof">Every message hashed — proof on send</div>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-left:auto">
+                            <button class="btn btn-secondary btn-sm" onclick="shareFile()">📎 FILE</button>
+                            <button class="btn btn-secondary btn-sm" onclick="shareVideo()">🎥 VIDEO</button>
+                            <button class="btn btn-secondary btn-sm" onclick="viewShared()">SHARED FILES</button>
+                        </div>
+                    </div>
+                    <div class="message-thread" id="message-thread"></div>
+                    <div class="message-composer">
+                        <textarea class="compose-input" id="compose-text" placeholder="Send a message... (proof generated on send)" onkeydown="handleCompose(event)"></textarea>
+                        <button class="compose-send" onclick="sendMessage()">SEND →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shared Media -->
+            <div class="panel" style="margin-top:16px" id="shared-files-panel" style="display:none">
+                <div class="panel-header">
+                    <div class="panel-title">SHARED FILES & MEDIA</div>
+                    <button class="btn btn-primary btn-sm" onclick="uploadFile()">UPLOAD</button>
+                </div>
+                <div class="panel-body">
+                    <div class="media-grid" id="media-grid"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === COLLABORATION PAGE === -->
+        <div id="page-collab" class="page">
+            <div class="collab-workspace">
+                <div class="collab-editor">
+                    <div class="panel-header">
+                        <div class="panel-title">LIVE COLLABORATION — JSONFLOW EDITOR</div>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn btn-secondary btn-sm" onclick="syncCollab()">SYNC</button>
+                            <button class="btn btn-primary btn-sm" onclick="runCollab()">▶ RUN + PROVE</button>
+                        </div>
+                    </div>
+                    <div class="collab-cursors" id="collab-cursors"></div>
+                    <div class="collab-code" id="collab-editor" contenteditable="true" spellcheck="false">{
+                        "name": "sovereign_transfer",
+                        "version": "1.0",
+                        "context": { "amount": 5000, "fee_pct": 0.01 },
+                        "vars": { "net_amount": 0, "fee": 0, "result": null },
+                        "steps": [
+                        {
+                        "type": "assign",
+                        "id": "calc_fee",
+                        "var": "fee",
+                        "expr": { "op": "MUL", "left": { "ref": "context.amount" }, "right": { "ref": "context.fee_pct" } }
+                        },
+                        {
+                        "type": "assign",
+                        "id": "calc_net",
+                        "var": "net_amount",
+                        "expr": { "op": "SUB", "left": { "ref": "context.amount" }, "right": { "ref": "fee" } }
+                        },
+                        {
+                        "type": "effect",
+                        "id": "emit_transfer",
+                        "effect": "transfer",
+                        "params": { "amount": { "ref": "net_amount" }, "fee": { "ref": "fee" } }
+                        },
+                        {
+                        "type": "return",
+                        "id": "done",
+                        "expr": { "ref": "net_amount" }
+                        }
+                        ]
+                        }</div>
+                </div>
+                <div class="collab-sidebar">
+                    <!-- Active collaborators -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <div class="panel-title">ACTIVE COLLABORATORS</div>
+                            <span class="panel-badge live">LIVE</span>
+                        </div>
+                        <div style="padding:12px;display:flex;flex-direction:column;gap:8px" id="collaborator-list"></div>
+                    </div>
+                    <!-- Execution trace -->
+                    <div class="panel" style="flex:1;overflow:hidden">
+                        <div class="panel-header">
+                            <div class="panel-title">EXECUTION TRACE</div>
+                        </div>
+                        <div style="padding:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.8;overflow-y:auto;max-height:300px" id="collab-trace">
+                            <span style="color:var(--muted)">Run the program to see step-by-step execution trace with proofs...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Node network -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">DISTRIBUTED INTELLIGENCE MESH — REAL-TIME NODE MAP</div>
+                    <span class="panel-badge live">P2P MESH</span>
+                </div>
+                <canvas id="network-canvas" class="node-canvas" style="height:280px"></canvas>
+            </div>
+        </div>
+
+        <!-- === APP BUILDER PAGE === -->
+        <div id="page-builder" class="page">
+            <div class="builder-grid">
+                <!-- Components -->
+                <div class="components-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">COMPONENTS</div>
+                    </div>
+                    <div style="overflow-y:auto;flex:1">
+                        <div style="padding:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em;border-bottom:1px solid var(--border)">PRIMITIVES</div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'button')">
+                            <div class="component-icon">🔘</div>Button
+                        </div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'input')">
+                            <div class="component-icon">📝</div>Input
+                        </div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'text')">
+                            <div class="component-icon">T</div>Text
+                        </div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'card')">
+                            <div class="component-icon">▭</div>Card
+                        </div>
+
+                        <div style="padding:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em;border-bottom:1px solid var(--border);border-top:1px solid var(--border);margin-top:4px">PROOF·COMPUTE</div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'proof-badge')">
+                            <div class="component-icon" style="color:var(--proof-green)">✓</div>Proof Badge
+                        </div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'cid-display')">
+                            <div class="component-icon" style="color:var(--ledger-blue)">#</div>CID Display
+                        </div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'ledger-view')">
+                            <div class="component-icon" style="color:var(--ledger-blue)">📊</div>Ledger View
+                        </div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'proof-runner')">
+                            <div class="component-icon" style="color:var(--event-orange)">⚡</div>Proof Runner
+                        </div>
+
+                        <div style="padding:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em;border-bottom:1px solid var(--border);border-top:1px solid var(--border);margin-top:4px">ECONOMY</div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'wallet')">
+                            <div class="component-icon" style="color:var(--reward-gold)">💰</div>Wallet Widget
+                        </div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'tip-btn')">
+                            <div class="component-icon" style="color:var(--reward-gold)">💸</div>Tip Button
+                        </div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'reward-track')">
+                            <div class="component-icon" style="color:var(--reward-gold)">🏆</div>Reward Tracker
+                        </div>
+
+                        <div style="padding:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em;border-bottom:1px solid var(--border);border-top:1px solid var(--border);margin-top:4px">MEDIA</div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'video-player')">
+                            <div class="component-icon">🎥</div>Video Player
+                        </div>
+                        <div class="component-item" draggable="true" ondragstart="dragComponent(event,'file-share')">
+                            <div class="component-icon">📁</div>File Share
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canvas -->
+                <div class="canvas-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">APP CANVAS</div>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn btn-secondary btn-sm" onclick="clearCanvas()">CLEAR</button>
+                            <button class="btn btn-secondary btn-sm" onclick="previewApp()">PREVIEW</button>
+                            <button class="btn btn-primary btn-sm" onclick="deployApp()">DEPLOY + HOST</button>
+                        </div>
+                    </div>
+                    <div class="canvas-area" id="canvas-area" ondrop="dropComponent(event)" ondragover="event.preventDefault()">
+                        <div class="canvas-drop-hint" id="canvas-hint">
+                            <div style="font-size:36px">⬡</div>
+                            <div>DRAG COMPONENTS HERE</div>
+                            <div style="color:var(--muted);font-size:10px">Every app built here is proof-compute enabled<br>and auto-deployed to the sovereign mesh</div>
+                        </div>
+                    </div>
+                    <div style="padding:8px 16px;border-top:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap" id="canvas-meta">
+                        <span>COMPONENTS: <span id="comp-count" style="color:var(--text)">0</span></span>
+                        <span>APP CID: <span id="app-cid" style="color:var(--ledger-blue)">not deployed</span></span>
+                        <span>STATUS: <span id="deploy-status" style="color:var(--muted)">draft</span></span>
+                    </div>
+                </div>
+
+                <!-- Props -->
+                <div class="props-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">PROPERTIES</div>
+                    </div>
+                    <div class="panel-body" id="props-panel-body">
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)">
+                            Click a component to edit its properties and JSONFlow bindings.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deployed Apps -->
+            <div class="panel" style="margin-top:24px">
+                <div class="panel-header">
+                    <div class="panel-title">DEPLOYED APPS — SOVEREIGN MESH</div>
+                    <span class="panel-badge verified">PROOF-HOSTED</span>
+                </div>
+                <div style="overflow-x:auto">
+                    <table class="ledger-table">
+                        <thead>
+                            <tr>
+                                <th>APP NAME</th>
+                                <th>CID</th>
+                                <th>VERSION</th>
+                                <th>DEPLOY DATE</th>
+                                <th>STATUS</th>
+                                <th>REVENUE</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deployed-apps-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- === ECONOMY PAGE === -->
+        <div id="page-economy" class="page">
+            <div class="wallet-grid">
+                <div class="wallet-card proof-card">
+                    <div class="col-label">PROOF BALANCE</div>
+                    <div class="metric-value" style="color:var(--proof-green);font-family:'Syne',sans-serif;font-size:36px;font-weight:800" id="wallet-proof">0</div>
+                    <div class="metric-sub" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)">SOVA · earned from proof generation</div>
+                    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+                        <button class="btn btn-primary btn-sm" onclick="claimReward()">CLAIM</button>
+                        <button class="btn btn-secondary btn-sm" onclick="stakeTokens()">STAKE</button>
+                    </div>
+                </div>
+                <div class="wallet-card compute-card">
+                    <div class="col-label">COMPUTE CREDITS</div>
+                    <div class="metric-value" style="color:var(--compute-purple);font-family:'Syne',sans-serif;font-size:36px;font-weight:800" id="wallet-compute">1000</div>
+                    <div class="metric-sub" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)">CRC · per execution unit</div>
+                    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+                        <button class="btn btn-primary btn-sm" onclick="buyCompute()">BUY MORE</button>
+                        <button class="btn btn-secondary btn-sm" onclick="sellCompute()">SELL</button>
+                    </div>
+                </div>
+                <div class="wallet-card reward-card">
+                    <div class="col-label">TOTAL EARNED</div>
+                    <div class="metric-value" style="color:var(--reward-gold);font-family:'Syne',sans-serif;font-size:36px;font-weight:800" id="wallet-earned">0</div>
+                    <div class="metric-sub" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)">lifetime · all reward tiers</div>
+                    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+                        <button class="btn btn-secondary btn-sm" onclick="viewEarnings()">HISTORY</button>
+                        <button class="btn btn-secondary btn-sm" onclick="withdrawFunds()">WITHDRAW</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reward Staircase - NOT a loop, stairs go UP -->
+            <div class="reward-staircase">
+                <div class="staircase-title">REWARD STAIRCASE — Earned through contribution, not time</div>
+                <div style="display:flex;gap:32px;align-items:flex-end;flex-wrap:wrap">
+                    <div class="stairs" style="flex:1;min-width:400px">
+                        <div class="stair s1" onclick="selectStair(1)">
+                            <div class="stair-val">10</div>
+                            <div class="stair-label" style="color:var(--reward-gold)">OBSERVER</div>
+                        </div>
+                        <div class="stair s2" onclick="selectStair(2)">
+                            <div class="stair-val">50</div>
+                            <div class="stair-label" style="color:var(--reward-gold)">VALIDATOR</div>
+                        </div>
+                        <div class="stair s3" onclick="selectStair(3)">
+                            <div class="stair-val">200</div>
+                            <div class="stair-label" style="color:var(--reward-gold)">PROVER</div>
+                        </div>
+                        <div class="stair s4" onclick="selectStair(4)">
+                            <div class="stair-val">1K</div>
+                            <div class="stair-label" style="color:var(--reward-gold)">BUILDER</div>
+                        </div>
+                        <div class="stair s5" onclick="selectStair(5)">
+                            <div class="stair-val">5K</div>
+                            <div class="stair-label" style="color:var(--reward-gold)">ARCHITECT</div>
+                        </div>
+                        <div class="stair s6 active" onclick="selectStair(6)">
+                            <div class="stair-val">∞</div>
+                            <div class="stair-label" style="color:var(--reward-gold)">SOVEREIGN</div>
+                        </div>
+                    </div>
+                    <div style="flex:1;min-width:280px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.8" id="stair-detail">
+                        <div style="color:var(--reward-gold);font-weight:700;font-size:13px;margin-bottom:8px">SOVEREIGN TIER</div>
+                        <div style="color:var(--muted)">Requirements:</div>
+                        <div>· Verified 10,000+ proofs</div>
+                        <div>· Running 3+ full nodes</div>
+                        <div>· Deployed 5+ apps on mesh</div>
+                        <div>· Staked ≥ 5,000 SOVA</div>
+                        <div style="margin-top:8px;color:var(--muted)">Rewards:</div>
+                        <div style="color:var(--reward-gold)">· Unlimited compute credits</div>
+                        <div style="color:var(--reward-gold)">· 40% revenue share on apps</div>
+                        <div style="color:var(--reward-gold)">· Governance voting rights</div>
+                        <div style="color:var(--reward-gold)">· Priority node placement</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monetization -->
+            <div class="two-col">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">MONETIZE YOUR WORK</div>
+                        <button class="btn btn-primary btn-sm" onclick="createMonetizationFlow()">+ CREATE FLOW</button>
+                    </div>
+                    <div class="panel-body">
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.9">
+                            <div style="color:var(--text);font-weight:700;margin-bottom:12px">JSONFlow Monetization Schema</div>
+                            <div style="color:var(--muted)">// Enable tips for your content</div>
+                            <div><span style="color:var(--compute-purple)">monetize</span>(<span style="color:var(--proof-green)">"tips"</span>, { <span style="color:var(--ledger-blue)">min:</span> <span style="color:var(--event-orange)">0.01</span> })</div>
+                            <div style="color:var(--muted)">// Launch a subscription</div>
+                            <div><span style="color:var(--compute-purple)">monetize</span>(<span style="color:var(--proof-green)">"subscription"</span>, { <span style="color:var(--ledger-blue)">price:</span> <span style="color:var(--event-orange)">4.99</span> })</div>
+                            <div style="color:var(--muted)">// Deploy to all chains</div>
+                            <div><span style="color:var(--compute-purple)">compile</span>(<span style="color:var(--proof-green)">"solidity"</span> | <span style="color:var(--proof-green)">"rust"</span> | <span style="color:var(--proof-green)">"python"</span>)</div>
+                            <br>
+                            <div style="color:var(--reward-gold)">→ Every payment generates a proof CID</div>
+                            <div style="color:var(--reward-gold)">→ Dispute any charge with your proof</div>
+                            <div style="color:var(--reward-gold)">→ Works on Ethereum, Solana, or IPFS</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">REVENUE STREAM — LIVE</div>
+                        <span class="panel-badge live">LIVE</span>
+                    </div>
+                    <div style="overflow-x:auto">
+                        <table class="ledger-table">
+                            <thead>
+                                <tr>
+                                    <th>TYPE</th>
+                                    <th>AMOUNT</th>
+                                    <th>FROM</th>
+                                    <th>PROOF CID</th>
+                                </tr>
+                            </thead>
+                            <tbody id="revenue-stream-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /app -->
+
+    <!-- MODAL -->
+    <div id="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <div class="modal-title" id="modal-title"></div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast-container"></div>
+
+    <script>
+        // =====================================================================
+        // SOVEREIGN OS — COMPLETE RUNTIME
+        // Incorporates: ProofCompute, JES, Trinity, Distributed Intelligence
+        // Author: Built from the a-project-book archive
+        // =====================================================================
+
+        'use strict';
+
+        // === CRYPTO ENGINE (browser-native SHA-256) ===
+        const PROOF_ENGINE = (() => {
+            async function sha256(data) {
+                const enc = new TextEncoder().encode(typeof data === 'string' ? data : JSON.stringify(data));
+                const buf = await crypto.subtle.digest('SHA-256', enc);
+                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            function canonical(v) {
+                if (v === null || v === undefined) return 'null';
+                if (typeof v === 'boolean') return String(v);
+                if (typeof v === 'number') return String(v);
+                if (typeof v === 'string') return JSON.stringify(v);
+                if (Array.isArray(v)) return '[' + v.map(canonical).join(',') + ']';
+                if (typeof v === 'object') {
+                    const keys = Object.keys(v).sort();
+                    return '{' + keys.map(k => JSON.stringify(k) + ':' + canonical(v[k])).join(',') + '}';
+                }
+                return JSON.stringify(v);
+            }
+
+            async function cidOf(value) {
+                const hash = await sha256(canonical(value));
+                return 'cid:sha256:' + hash;
+            }
+
+            async function merkleRoot(hashes) {
+                if (!hashes.length) return null;
+                if (hashes.length === 1) return hashes[0];
+                let level = [...hashes];
+                while (level.length > 1) {
+                    const next = [];
+                    for (let i = 0; i < level.length; i += 2) {
+                        const l = level[i],
+                            r = level[i + 1] || level[i];
+                        const combined = l + r;
+                        next.push(await sha256(combined));
+                    }
+                    level = next;
+                }
+                return level[0];
+            }
+
+            async function executeFlow(flow) {
+                const {
+                    reducer,
+                    initialState,
+                    events
+                } = flow;
+                const inputCid = await cidOf({
+                    reducer,
+                    initialState,
+                    events
+                });
+                let state = JSON.parse(JSON.stringify(initialState));
+                const dag = [];
+
+                for (let i = 0; i < events.length; i++) {
+                    const event = events[i];
+                    const prevState = JSON.parse(JSON.stringify(state));
+                    const prevStateCid = await cidOf(prevState);
+                    const eventCid = await cidOf(event);
+
+                    // Apply reducer
+                    state = applyReducer(reducer, state, event);
+
+                    const stateCid = await cidOf(state);
+                    const stateHash = await sha256(canonical(state));
+                    const eventHash = await sha256(canonical(event));
+
+                    dag.push({
+                        seq: i,
+                        event,
+                        eventCid,
+                        eventHash,
+                        prevState,
+                        prevStateCid,
+                        state: JSON.parse(JSON.stringify(state)),
+                        stateCid,
+                        stateHash
+                    });
+                }
+
+                const stateHashes = dag.map(n => n.stateHash);
+                const dagRoot = stateHashes.length ? await merkleRoot(stateHashes) : await sha256('empty');
+                const dagRootCid = 'cid:sha256:' + dagRoot;
+                const outputCid = await cidOf(state);
+
+                const proof = {
+                    v: 1,
+                    inputCid,
+                    outputCid,
+                    dagRootCid,
+                    dagSize: dag.length,
+                    dagLeaves: dag.map(n => ({
+                        seq: n.seq,
+                        stateCid: n.stateCid,
+                        stateHash: n.stateHash,
+                        eventCid: n.eventCid,
+                        eventHash: n.eventHash,
+                        prevStateCid: n.prevStateCid
+                    }))
+                };
+
+                return {
+                    flow,
+                    finalState: state,
+                    inputCid,
+                    outputCid,
+                    dagRootCid,
+                    dag,
+                    proof
+                };
+            }
+
+            function applyReducer(name, state, event) {
+                const s = JSON.parse(JSON.stringify(state));
+                switch (name) {
+                    case 'core/ledger': {
+                        if (!s.entries) s.entries = [];
+                        if (!s.balance) s.balance = 0;
+                        if (event.type === 'entry') {
+                            const amount = parseInt(event.amount) || 0;
+                            s.entries.push({
+                                id: event.id,
+                                type: event.entryType,
+                                amount,
+                                desc: event.description || '',
+                                ts: Date.now()
+                            });
+                            s.balance += amount;
+                        }
+                        return s;
+                    }
+                    case 'core/kv': {
+                        if (!s.data) s.data = {};
+                        if (event.type === 'set') s.data[event.key] = event.value;
+                        if (event.type === 'del') delete s.data[event.key];
+                        if (event.type === 'clear') s.data = {};
+                        return s;
+                    }
+                    case 'core/sum': {
+                        if (s.value === undefined) s.value = 0;
+                        if (event.type === 'add') s.value += (parseInt(event.amount) || 0);
+                        if (event.type === 'sub') s.value -= (parseInt(event.amount) || 0);
+                        if (event.type === 'reset') s.value = 0;
+                        return s;
+                    }
+                    case 'core/list': {
+                        if (!s.items) s.items = [];
+                        if (event.type === 'push') s.items.push(event.item);
+                        if (event.type === 'pop') s.items.pop();
+                        if (event.type === 'remove') s.items = s.items.filter((_, i) => i !== event.index);
+                        return s;
+                    }
+                    default: {
+                        // Custom reducers
+                        if (CUSTOM_REDUCERS[name]) return CUSTOM_REDUCERS[name](s, event);
+                        return s;
+                    }
+                }
+            }
+
+            async function verifyExecution(result) {
+                const rerun = await executeFlow(result.flow);
+                return rerun.inputCid === result.inputCid &&
+                    rerun.outputCid === result.outputCid &&
+                    rerun.dagRootCid === result.dagRootCid;
+            }
+
+            return {
+                sha256,
+                canonical,
+                cidOf,
+                merkleRoot,
+                executeFlow,
+                verifyExecution
+            };
+        })();
+
+        const CUSTOM_REDUCERS = {};
+
+        // === GLOBAL STATE ===
+        const STATE = {
+            events: [],
+            eventCount: 0,
+            tps: 0,
+            proofCount: 0,
+            ledgerEntries: [],
+            computeUnits: 0,
+            balance: 0,
+            earned: 0,
+            nodes: 8,
+            messages: {},
+            activeChannel: 'general',
+            lastResult: null,
+            ledgerState: {
+                entries: [],
+                balance: 0
+            },
+            ledgerDag: [],
+            deployedApps: [],
+            canvasComponents: [],
+            proofHistory: [],
+            revenueStream: [],
+            walletProof: 0,
+            walletCompute: 1000,
+            walletEarned: 0
+        };
+
+        // === REDUCERS REGISTRY DATA ===
+        const REDUCERS_DATA = [{
+                id: 'core/ledger',
+                shape: '{ entries[], balance }',
+                events: 'entry',
+                det: true,
+                cid: null,
+                runs: 0
+            },
+            {
+                id: 'core/kv',
+                shape: '{ data{} }',
+                events: 'set, del, clear',
+                det: true,
+                cid: null,
+                runs: 0
+            },
+            {
+                id: 'core/sum',
+                shape: '{ value }',
+                events: 'add, sub, reset',
+                det: true,
+                cid: null,
+                runs: 0
+            },
+            {
+                id: 'core/list',
+                shape: '{ items[] }',
+                events: 'push, pop, remove',
+                det: true,
+                cid: null,
+                runs: 0
+            },
+            {
+                id: 'ai/code-review',
+                shape: '{ reviews[], cacheHits }',
+                events: 'review',
+                det: true,
+                cid: null,
+                runs: 0
+            }
+        ];
+
+        // === CHANNELS ===
+        const CHANNELS = [{
+                id: 'general',
+                name: '# general',
+                preview: 'Welcome to SovereignOS mesh...',
+                unread: 0
+            },
+            {
+                id: 'proofs',
+                name: '# proofs',
+                preview: 'New proof generated: cid:sha256...',
+                unread: 3
+            },
+            {
+                id: 'ledger',
+                name: '# ledger',
+                preview: 'Entry confirmed at block #142',
+                unread: 1
+            },
+            {
+                id: 'dev',
+                name: '# dev',
+                preview: 'JSONFlow compiler update...',
+                unread: 0
+            },
+            {
+                id: 'economy',
+                name: '🏆 economy',
+                preview: 'Reward distributed to validators',
+                unread: 2
+            },
+        ];
+
+        // === EVENT TYPES ===
+        const EVENT_TEMPLATES = [{
+                type: 'PROOF_GENERATED',
+                color: 'proof',
+                label: 'PROOF'
+            },
+            {
+                type: 'ENTRY_CONFIRMED',
+                color: 'ledger',
+                label: 'LEDGER'
+            },
+            {
+                type: 'COMPUTE_EXEC',
+                color: 'compute',
+                label: 'COMPUTE'
+            },
+            {
+                type: 'REWARD_ISSUED',
+                color: 'reward',
+                label: 'REWARD'
+            },
+            {
+                type: 'NODE_JOINED',
+                color: 'network',
+                label: 'NETWORK'
+            },
+            {
+                type: 'MESSAGE_SENT',
+                color: 'message',
+                label: 'MSG'
+            },
+            {
+                type: 'DAG_UPDATED',
+                color: 'proof',
+                label: 'DAG'
+            },
+            {
+                type: 'MERKLE_ROOT',
+                color: 'compute',
+                label: 'MERKLE'
+            },
+        ];
+
+        const NODES_CONFIG = [{
+                id: 'NODE-A1',
+                status: 'online',
+                latency: 12
+            },
+            {
+                id: 'NODE-B2',
+                status: 'online',
+                latency: 8
+            },
+            {
+                id: 'NODE-C3',
+                status: 'syncing',
+                latency: 45
+            },
+            {
+                id: 'NODE-D4',
+                status: 'online',
+                latency: 22
+            },
+            {
+                id: 'NODE-E5',
+                status: 'online',
+                latency: 15
+            },
+            {
+                id: 'NODE-F6',
+                status: 'online',
+                latency: 31
+            },
+            {
+                id: 'NODE-G7',
+                status: 'syncing',
+                latency: 67
+            },
+            {
+                id: 'NODE-H8',
+                status: 'online',
+                latency: 19
+            },
+        ];
+
+        const COLLABORATORS = [{
+                id: 'xhe',
+                name: 'xhe.carpenter',
+                color: '#00ff88',
+                initial: 'X'
+            },
+            {
+                id: 'sol',
+                name: 'sol.validator',
+                color: '#00ccff',
+                initial: 'S'
+            },
+            {
+                id: 'jes',
+                name: 'jes.prover',
+                color: '#ff6600',
+                initial: 'J'
+            },
+        ];
+
+        const DEPLOYED_APPS_SEED = [{
+                name: 'ProofCompute Portal',
+                cid: 'cid:sha256:a3f9e2...',
+                ver: '1.2.0',
+                date: '2026-04-28',
+                status: 'live',
+                revenue: '1,240 SOVA'
+            },
+            {
+                name: 'JES Flow Runner',
+                cid: 'cid:sha256:b8c1d5...',
+                ver: '0.9.1',
+                date: '2026-04-22',
+                status: 'live',
+                revenue: '320 SOVA'
+            },
+            {
+                name: 'Sovereign Ledger UI',
+                cid: 'cid:sha256:f2a0e7...',
+                ver: '2.1.0',
+                date: '2026-05-01',
+                status: 'live',
+                revenue: '870 SOVA'
+            },
+        ];
+
+        // === SHORT HASH UTIL ===
+        function shortHash(h) {
+            if (!h) return '—';
+            const clean = h.replace('cid:sha256:', '');
+            return clean.substring(0, 8) + '…' + clean.substring(clean.length - 4);
+        }
+
+        // === EVENT BAR ===
+        async function buildEventBar() {
+            const track = document.getElementById('event-track');
+            const events = [];
+            for (let i = 0; i < 40; i++) {
+                const tmpl = EVENT_TEMPLATES[i % EVENT_TEMPLATES.length];
+                const hash = await PROOF_ENGINE.sha256(tmpl.type + i + Date.now());
+                events.push({
+                    ...tmpl,
+                    hash: hash.substring(0, 16)
+                });
+            }
+            const html = events.map(e =>
+                `<span class="event-item ${e.color}"><span class="evt-type">[${e.label}]</span><span>${e.type}</span><span style="opacity:0.5">${e.hash}</span></span>`
+            ).join('');
+            track.innerHTML = html + html; // double for seamless loop
+        }
+
+        function emitEvent(type, color, payload) {
+            STATE.eventCount++;
+            STATE.events.unshift({
+                type,
+                color,
+                payload,
+                ts: Date.now()
+            });
+            if (STATE.events.length > 100) STATE.events.pop();
+            document.getElementById('evt-count').textContent = STATE.eventCount;
+
+            // Update ledger if visible
+            updateLiveLedger();
+        }
+
+        // === LIVE LEDGER ===
+        const LIVE_LEDGER_DATA = [];
+
+        async function generateLiveLedgerRow() {
+            const types = [{
+                    type: 'PROOF',
+                    color: 'proof',
+                    payload: 'Execution verified'
+                },
+                {
+                    type: 'LEDGER',
+                    color: 'ledger',
+                    payload: 'Entry confirmed'
+                },
+                {
+                    type: 'COMPUTE',
+                    color: 'compute',
+                    payload: 'JSONFlow executed'
+                },
+                {
+                    type: 'REWARD',
+                    color: 'reward',
+                    payload: 'Staircase step earned'
+                },
+                {
+                    type: 'EVENT',
+                    color: 'event',
+                    payload: 'Distributed gossip'
+                },
+                {
+                    type: 'MESSAGE',
+                    color: 'message',
+                    payload: 'Channel message'
+                },
+            ];
+            const t = types[Math.floor(Math.random() * types.length)];
+            const hash = await PROOF_ENGINE.sha256(JSON.stringify(t) + Date.now() + Math.random());
+            const proof = await PROOF_ENGINE.sha256(hash);
+            return {
+                seq: LIVE_LEDGER_DATA.length + 1,
+                type: t.type,
+                color: t.color,
+                payload: t.payload,
+                cid: shortHash('cid:sha256:' + hash),
+                fullCid: 'cid:sha256:' + hash,
+                proof: shortHash('cid:sha256:' + proof)
+            };
+        }
+
+        function updateLiveLedger() {
+            const body = document.getElementById('live-ledger-body');
+            if (!body) return;
+            const rows = LIVE_LEDGER_DATA.slice(0, 8).map(r =>
+                `<tr>
+      <td style="color:var(--muted)">${r.seq}</td>
+      <td><span class="tx-type ${r.color}">${r.type}</span></td>
+      <td class="hash-short" onclick="showCid('${r.fullCid}')">${r.cid}</td>
+      <td style="font-size:11px;color:var(--text)">${r.payload}</td>
+      <td class="hash-short" style="color:var(--proof-green)">${r.proof}</td>
+    </tr>`
+            ).join('');
+            body.innerHTML = rows;
+        }
+
+        // === DAG CHAIN ===
+        const DAG_BLOCKS = [];
+
+        async function addDagBlock(type) {
+            const num = DAG_BLOCKS.length + 1;
+            const hash = await PROOF_ENGINE.sha256('block' + num + Date.now());
+            DAG_BLOCKS.push({
+                num,
+                hash,
+                type
+            });
+            if (DAG_BLOCKS.length > 8) DAG_BLOCKS.shift();
+            renderDagChain();
+            updateMerkleViz();
+        }
+
+        function renderDagChain() {
+            const el = document.getElementById('dag-chain-viz');
+            if (!el) return;
+            const html = DAG_BLOCKS.map((b, i) => {
+                const isLatest = i === DAG_BLOCKS.length - 1;
+                return (i > 0 ? '<span class="dag-arrow">→</span>' : '') +
+                    `<div class="dag-block ${isLatest ? 'latest' : ''}" onclick="showBlockDetail(${i})">
+        <div class="dag-block-hash">${b.hash.substring(0,8)}</div>
+        <div class="dag-block-num">#${b.num}</div>
+        <div class="dag-block-type">${b.type}</div>
+      </div>`;
+            }).join('');
+            el.innerHTML = html;
+        }
+
+        async function updateMerkleViz() {
+            const el = document.getElementById('merkle-tree-display');
+            if (!el || DAG_BLOCKS.length === 0) return;
+            const hashes = DAG_BLOCKS.map(b => b.hash);
+            const root = await PROOF_ENGINE.merkleRoot(hashes);
+            let html = `<span class="merkle-root">ROOT: ${root.substring(0,16)}…</span>\n`;
+            html += `<span class="merkle-link">├─</span> ${hashes.length} leaf nodes\n`;
+            hashes.slice(-3).forEach((h, i) => {
+                html += `<span class="merkle-link">${i === hashes.slice(-3).length-1 ? '└' : '├'}─</span> <span class="merkle-leaf">${h.substring(0,12)}…</span>\n`;
+            });
+
+            // Update CID displays
+            const rootCid = 'cid:sha256:' + root;
+            document.getElementById('live-merkle-cid').textContent = 'MERKLE · ' + shortHash(rootCid);
+            el.textContent = html;
+        }
+
+        // === NODE RING ===
+        function renderNodeRing() {
+            const el = document.getElementById('node-ring');
+            if (!el) return;
+            el.innerHTML = NODES_CONFIG.map(n =>
+                `<div class="node-status ${n.status}" onclick="showNodeDetail('${n.id}')">
+      <div class="node-indicator ${n.status}"></div>
+      <div class="node-id">${n.id}</div>
+      <div class="node-latency">${n.latency}ms</div>
+    </div>`
+            ).join('');
+        }
+
+        // === METRICS UPDATER ===
+        function updateMetrics() {
+            document.getElementById('m-proofs').textContent = STATE.proofCount;
+            document.getElementById('m-entries').textContent = STATE.ledgerEntries.length;
+            document.getElementById('m-events').textContent = STATE.eventCount;
+            document.getElementById('m-compute').textContent = STATE.computeUnits;
+            document.getElementById('m-balance').textContent = STATE.walletProof.toLocaleString();
+            document.getElementById('m-nodes').textContent = STATE.nodes;
+            document.getElementById('wallet-proof').textContent = STATE.walletProof.toLocaleString();
+            document.getElementById('wallet-compute').textContent = STATE.walletCompute.toLocaleString();
+            document.getElementById('wallet-earned').textContent = STATE.walletEarned.toLocaleString();
+            document.getElementById('live-block-num').textContent = 'BLOCK #' + (DAG_BLOCKS.length || 0);
+        }
+
+        // === PROOF COMPUTE PAGE ===
+        const EXAMPLES = {
+            ledger: `{
+  "reducer": "core/ledger",
+  "initialState": { "entries": [], "balance": 0 },
+  "events": [
+    { "type": "entry", "id": "dep-1", "entryType": "deposit", "amount": 10000, "description": "Initial deposit" },
+    { "type": "entry", "id": "pay-1", "entryType": "payment", "amount": -2500, "description": "Service fee" },
+    { "type": "entry", "id": "rew-1", "entryType": "reward", "amount": 500, "description": "Proof reward" }
+  ]
+}`,
+            kv: `{
+  "reducer": "core/kv",
+  "initialState": { "data": {} },
+  "events": [
+    { "type": "set", "key": "user:alice", "value": { "balance": 5000, "tier": "PROVER" } },
+    { "type": "set", "key": "user:bob", "value": { "balance": 1200, "tier": "VALIDATOR" } },
+    { "type": "set", "key": "system:tps", "value": 142 },
+    { "type": "del", "key": "user:bob" }
+  ]
+}`,
+            sum: `{
+  "reducer": "core/sum",
+  "initialState": { "value": 0 },
+  "events": [
+    { "type": "add", "amount": 1000 },
+    { "type": "add", "amount": 500 },
+    { "type": "sub", "amount": 200 },
+    { "type": "add", "amount": 750 }
+  ]
+}`
+        };
+
+        function loadExample(name) {
+            document.getElementById('flow-editor').value = EXAMPLES[name] || '';
+        }
+
+        async function executeProof() {
+            const btn = document.getElementById('run-btn');
+            btn.disabled = true;
+            btn.textContent = '⏳ PROVING...';
+            const out = document.getElementById('proof-output');
+            out.innerHTML = '<span style="color:var(--muted)">Executing flow...</span>';
+
+            try {
+                const raw = document.getElementById('flow-editor').value.trim();
+                const flow = JSON.parse(raw);
+                const result = await PROOF_ENGINE.executeFlow(flow);
+                STATE.lastResult = result;
+                STATE.proofCount++;
+                STATE.computeUnits += result.dag.length;
+                STATE.walletProof += result.dag.length * 5;
+                STATE.walletEarned += result.dag.length * 5;
+
+                // Find the reducer in registry and update
+                const reg = REDUCERS_DATA.find(r => r.id === flow.reducer);
+                if (reg) {
+                    reg.cid = shortHash(result.outputCid);
+                    reg.runs++;
+                }
+
+                // Add to proof history
+                STATE.proofHistory.unshift({
+                    ts: new Date().toLocaleTimeString(),
+                    reducer: flow.reducer,
+                    events: flow.events.length,
+                    inputCid: shortHash(result.inputCid),
+                    outputCid: shortHash(result.outputCid),
+                    dagRoot: shortHash(result.dagRootCid),
+                    valid: true
+                });
+
+                // Render output
+                const lines = [{
+                        key: 'reducer',
+                        val: flow.reducer,
+                        cls: ''
+                    },
+                    {
+                        key: 'events_count',
+                        val: flow.events.length,
+                        cls: 'num'
+                    },
+                    {
+                        key: 'dag_size',
+                        val: result.dag.length,
+                        cls: 'num'
+                    },
+                    {
+                        key: '─────────────',
+                        val: '',
+                        cls: ''
+                    },
+                    {
+                        key: 'inputCid',
+                        val: result.inputCid,
+                        cls: 'cid'
+                    },
+                    {
+                        key: 'outputCid',
+                        val: result.outputCid,
+                        cls: 'cid'
+                    },
+                    {
+                        key: 'dagRootCid',
+                        val: result.dagRootCid,
+                        cls: 'hash'
+                    },
+                    {
+                        key: '─────────────',
+                        val: '',
+                        cls: ''
+                    },
+                    {
+                        key: 'proof.v',
+                        val: result.proof.v,
+                        cls: 'num'
+                    },
+                    {
+                        key: 'proof.dagSize',
+                        val: result.proof.dagSize,
+                        cls: 'num'
+                    },
+                    {
+                        key: '─────────────',
+                        val: '',
+                        cls: ''
+                    },
+                    {
+                        key: 'finalState',
+                        val: JSON.stringify(result.finalState, null, 0).substring(0, 120) + (JSON.stringify(result.finalState).length > 120 ? '…' : ''),
+                        cls: ''
+                    },
+                    {
+                        key: '─────────────',
+                        val: '',
+                        cls: ''
+                    },
+                    {
+                        key: 'VERIFIED',
+                        val: '✅ PROOF ACCEPTED',
+                        cls: 'bool-true'
+                    },
+                ];
+
+                out.innerHTML = lines.map(l =>
+                    l.val === '' ?
+                    `<div style="color:var(--border);padding:2px 0">${l.key}</div>` :
+                    `<div class="proof-line"><span class="proof-key">${l.key}:</span><span class="proof-val ${l.cls}">${l.val}</span></div>`
+                ).join('');
+
+                // Update CIDs in header
+                document.getElementById('live-input-cid').textContent = 'INPUT · ' + shortHash(result.inputCid);
+                document.getElementById('live-output-cid').textContent = 'OUTPUT · ' + shortHash(result.outputCid);
+                document.getElementById('live-dag-cid').textContent = 'DAG · ' + shortHash(result.dagRootCid);
+
+                // Add to DAG
+                await addDagBlock('PROOF');
+                emitEvent('PROOF_GENERATED', 'proof', result.outputCid);
+
+                renderReducerRegistry();
+                renderProofHistory();
+                updateMetrics();
+                toast('Proof generated — ' + shortHash(result.outputCid), 'success');
+            } catch (e) {
+                out.innerHTML = `<span style="color:var(--event-orange)">ERROR: ${e.message}</span>`;
+                toast(e.message, 'warn');
+            }
+            btn.disabled = false;
+            btn.textContent = '▶ RUN + PROVE';
+        }
+
+        async function verifyLastProof() {
+            if (!STATE.lastResult) {
+                toast('Run a flow first', 'warn');
+                return;
+            }
+            const valid = await PROOF_ENGINE.verifyExecution(STATE.lastResult);
+            toast(valid ? '✅ PROOF VERIFIED — same input, same output' : '❌ VERIFICATION FAILED', valid ? 'success' : 'warn');
+        }
+
+        function copyProof() {
+            if (!STATE.lastResult) {
+                toast('No proof yet', 'warn');
+                return;
+            }
+            navigator.clipboard?.writeText(STATE.lastResult.outputCid);
+            toast('CID copied: ' + shortHash(STATE.lastResult.outputCid), 'info');
+        }
+
+        function renderReducerRegistry() {
+            const body = document.getElementById('reducer-registry-body');
+            if (!body) return;
+            body.innerHTML = REDUCERS_DATA.map(r =>
+                `<tr>
+      <td style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--compute-purple)">${r.id}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)">${r.shape}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text)">${r.events}</td>
+      <td><span class="tx-type proof">YES</span></td>
+      <td class="hash-short">${r.cid || '—'}</td>
+      <td style="color:var(--proof-green)">${r.runs}</td>
+    </tr>`
+            ).join('');
+        }
+
+        function renderProofHistory() {
+            const body = document.getElementById('proof-history-body');
+            if (!body) return;
+            body.innerHTML = STATE.proofHistory.slice(0, 10).map(p =>
+                `<tr>
+      <td style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px">${p.ts}</td>
+      <td style="color:var(--compute-purple)">${p.reducer}</td>
+      <td style="color:var(--text)">${p.events}</td>
+      <td class="hash-short">${p.inputCid}</td>
+      <td class="hash-short">${p.outputCid}</td>
+      <td class="hash-short" style="color:var(--proof-green)">${p.dagRoot}</td>
+      <td><span class="tx-type proof">✓</span></td>
+    </tr>`
+            ).join('');
+        }
+
+        function registerReducer() {
+            openModal('REGISTER REDUCER', `
+    <div class="input-group"><label>REDUCER ID</label><input type="text" id="m-rid" placeholder="namespace/name" style="background:var(--deep);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);width:100%;font-family:'IBM Plex Mono',monospace"></div>
+    <div class="input-group"><label>EVENT TYPES (comma-separated)</label><input type="text" id="m-revts" placeholder="set, del, clear" style="background:var(--deep);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);width:100%;font-family:'IBM Plex Mono',monospace"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="confirmRegisterReducer()">REGISTER</button>
+  `);
+        }
+
+        function confirmRegisterReducer() {
+            const id = document.getElementById('m-rid')?.value;
+            const evts = document.getElementById('m-revts')?.value;
+            if (id && evts) {
+                REDUCERS_DATA.push({
+                    id,
+                    shape: '{ ... }',
+                    events: evts,
+                    det: true,
+                    cid: null,
+                    runs: 0
+                });
+                renderReducerRegistry();
+                closeModal();
+                toast('Reducer registered: ' + id, 'success');
+            }
+        }
+
+        function clearHistory() {
+            STATE.proofHistory = [];
+            renderProofHistory();
+            toast('History cleared', 'info');
+        }
+
+        // === LEDGER PAGE ===
+        async function addLedgerEntry() {
+            const type = document.getElementById('entry-type').value;
+            const amount = parseInt(document.getElementById('entry-amount').value) || 0;
+            const desc = document.getElementById('entry-desc').value || '';
+            const id = `${type}-${Date.now()}`;
+            const signedAmount = type === 'deposit' || type === 'reward' ? Math.abs(amount) : -Math.abs(amount);
+
+            const event = {
+                type: 'entry',
+                id,
+                entryType: type,
+                amount: signedAmount,
+                description: desc
+            };
+            const flow = {
+                reducer: 'core/ledger',
+                initialState: JSON.parse(JSON.stringify(STATE.ledgerState)),
+                events: [event]
+            };
+
+            try {
+                const result = await PROOF_ENGINE.executeFlow(flow);
+                STATE.ledgerState = result.finalState;
+                const lastDagNode = result.dag[result.dag.length - 1];
+                STATE.ledgerEntries.push({
+                    ...event,
+                    ...lastDagNode,
+                    seq: STATE.ledgerEntries.length + 1
+                });
+                STATE.ledgerDag.push(lastDagNode);
+
+                // Update ledger state display
+                const ls = STATE.ledgerState;
+                const deposits = ls.entries.filter(e => e.amount > 0).reduce((s, e) => s + e.amount, 0);
+                const payments = ls.entries.filter(e => e.amount < 0 && e.type !== 'reward').reduce((s, e) => s + e.amount, 0);
+                const rewards = ls.entries.filter(e => e.type === 'reward').reduce((s, e) => s + e.amount, 0);
+
+                document.getElementById('ls-balance').textContent = ls.balance.toLocaleString();
+                document.getElementById('ls-count').textContent = ls.entries.length;
+                document.getElementById('ls-deposits').textContent = deposits.toLocaleString();
+                document.getElementById('ls-payments').textContent = payments.toLocaleString();
+                document.getElementById('ls-rewards').textContent = rewards.toLocaleString();
+                document.getElementById('ls-cid').textContent = shortHash(result.outputCid);
+                document.getElementById('ls-dag').textContent = shortHash(result.dagRootCid);
+                document.getElementById('ls-verified').textContent = '✅ true';
+
+                await addDagBlock('LEDGER');
+                emitEvent('ENTRY_CONFIRMED', 'ledger', id);
+                renderFullLedger();
+                updateMetrics();
+                toast(`Entry posted: ${type} ${signedAmount > 0 ? '+' : ''}${signedAmount}`, 'success');
+            } catch (e) {
+                toast(e.message, 'warn');
+            }
+        }
+
+        function renderFullLedger() {
+            const body = document.getElementById('ledger-full-body');
+            if (!body) return;
+            body.innerHTML = STATE.ledgerEntries.map((e, i) => {
+                const running = STATE.ledgerState.entries.slice(0, i + 1).reduce((s, x) => s + x.amount, 0);
+                const typeColor = e.entryType === 'deposit' || e.entryType === 'reward' ? 'proof' : e.entryType === 'payment' ? 'event' : 'ledger';
+                return `<tr>
+      <td style="color:var(--muted)">${e.seq}</td>
+      <td><span class="tx-type ${typeColor}">${e.entryType?.toUpperCase() || '—'}</span></td>
+      <td style="color:${e.amount >= 0 ? 'var(--proof-green)' : 'var(--event-orange)'};font-family:'IBM Plex Mono',monospace">${e.amount >= 0 ? '+' : ''}${(e.amount||0).toLocaleString()}</td>
+      <td style="font-size:11px">${e.desc || '—'}</td>
+      <td class="hash-short">${shortHash(e.eventCid)}</td>
+      <td class="hash-short">${shortHash(e.stateCid)}</td>
+      <td class="hash-short">${shortHash(e.prevStateCid)}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--text)">${running.toLocaleString()}</td>
+    </tr>`;
+            }).join('');
+        }
+
+        function exportLedger() {
+            const data = JSON.stringify({
+                state: STATE.ledgerState,
+                entries: STATE.ledgerEntries,
+                dag: STATE.ledgerDag
+            }, null, 2);
+            const blob = new Blob([data], {
+                type: 'application/json'
+            });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'sovereign-ledger.json';
+            a.click();
+            toast('Ledger exported', 'info');
+        }
+
+        async function replayLedger() {
+            if (!STATE.ledgerEntries.length) {
+                toast('No entries to replay', 'warn');
+                return;
+            }
+            const events = STATE.ledgerEntries.map(e => ({
+                type: 'entry',
+                id: e.id,
+                entryType: e.entryType,
+                amount: e.amount,
+                description: e.desc
+            }));
+            const flow = {
+                reducer: 'core/ledger',
+                initialState: {
+                    entries: [],
+                    balance: 0
+                },
+                events
+            };
+            const result = await PROOF_ENGINE.executeFlow(flow);
+            const valid = result.finalState.balance === STATE.ledgerState.balance;
+            toast(valid ? '✅ Replay verified — ledger is consistent' : '❌ Replay mismatch!', valid ? 'success' : 'warn');
+        }
+
+        // === MESSAGING ===
+        function renderChannels() {
+            const el = document.getElementById('channel-list-items');
+            if (!el) return;
+            el.innerHTML = CHANNELS.map(c =>
+                `<div class="channel-item ${c.id === STATE.activeChannel ? 'active' : ''}" onclick="selectChannel('${c.id}')">
+      <div class="channel-badge">
+        <div class="channel-name">${c.name}</div>
+        ${c.unread > 0 ? `<span class="channel-unread">${c.unread}</span>` : ''}
+      </div>
+      <div class="channel-preview">${c.preview}</div>
+    </div>`
+            ).join('');
+        }
+
+        function selectChannel(id) {
+            STATE.activeChannel = id;
+            const ch = CHANNELS.find(c => c.id === id);
+            ch.unread = 0;
+            document.getElementById('active-channel-name').textContent = ch?.name || '';
+            renderChannels();
+            renderMessages();
+        }
+
+        function filterChannels(q) {
+            const items = document.querySelectorAll('.channel-item');
+            items.forEach(el => {
+                el.style.display = el.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        // Seed messages
+        const MSG_SEED = {
+            general: [{
+                    from: 'sol.validator',
+                    text: 'SovereignOS is live — every message produces a proof CID',
+                    mine: false,
+                    proof: 'cid:sha256:a3f9e2c1'
+                },
+                {
+                    from: 'jes.prover',
+                    text: 'JES engine running 142 flows/second. Full determinism.',
+                    mine: false,
+                    proof: 'cid:sha256:b8c1d560'
+                },
+                {
+                    from: 'you',
+                    text: 'All computations verified by the mesh. No trust required.',
+                    mine: true,
+                    proof: 'cid:sha256:f2a0e7d3'
+                },
+            ],
+            proofs: [{
+                    from: 'xhe.carpenter',
+                    text: 'New proof: core/ledger flow with 3 events. dagRootCid confirmed.',
+                    mine: false,
+                    proof: 'cid:sha256:d4e8f103'
+                },
+                {
+                    from: 'you',
+                    text: 'Verified the replay — same CID on my node.',
+                    mine: true,
+                    proof: 'cid:sha256:c7b2a941'
+                },
+            ]
+        };
+
+        function renderMessages() {
+            const el = document.getElementById('message-thread');
+            if (!el) return;
+            const msgs = STATE.messages[STATE.activeChannel] || MSG_SEED[STATE.activeChannel] || [];
+            el.innerHTML = msgs.map(m =>
+                `<div class="message-bubble ${m.mine ? 'mine' : 'other'}">
+      <div class="bubble-meta ${m.mine ? 'mine' : ''}">
+        <span>${m.from}</span>
+        <span style="opacity:0.5">${new Date().toLocaleTimeString()}</span>
+      </div>
+      <div class="bubble-content">${m.text}</div>
+      ${m.proof ? `<span class="bubble-proof" onclick="showCid('${m.proof}')">⚡ ${m.proof.substring(0,24)}…</span>` : ''}
+    </div>`
+            ).join('');
+            el.scrollTop = el.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const el = document.getElementById('compose-text');
+            const text = el.value.trim();
+            if (!text) return;
+            const hash = await PROOF_ENGINE.sha256(text + Date.now());
+            const proof = 'cid:sha256:' + hash;
+            const msg = {
+                from: 'you',
+                text,
+                mine: true,
+                proof
+            };
+            if (!STATE.messages[STATE.activeChannel]) STATE.messages[STATE.activeChannel] = [...(MSG_SEED[STATE.activeChannel] || [])];
+            STATE.messages[STATE.activeChannel].push(msg);
+            el.value = '';
+            renderMessages();
+            emitEvent('MESSAGE_SENT', 'message', text.substring(0, 30));
+            toast('Message sent · ' + shortHash(proof), 'info');
+        }
+
+        function handleCompose(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function newChannel() {
+            openModal('NEW CHANNEL', `
+    <div class="input-group"><label>CHANNEL NAME</label><input type="text" id="m-chname" placeholder="my-channel" style="background:var(--deep);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);width:100%;font-family:'IBM Plex Mono',monospace"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="confirmNewChannel()">CREATE</button>
+  `);
+        }
+
+        function confirmNewChannel() {
+            const name = document.getElementById('m-chname')?.value;
+            if (name) {
+                CHANNELS.push({
+                    id: name,
+                    name: '# ' + name,
+                    preview: 'New channel',
+                    unread: 0
+                });
+                renderChannels();
+                closeModal();
+                toast('Channel created: #' + name, 'success');
+            }
+        }
+
+        const SHARED_MEDIA = [{
+                type: 'video',
+                icon: '🎥',
+                name: 'proof-compute-demo.mp4',
+                size: '24 MB',
+                cid: 'cid:sha256:vid001'
+            },
+            {
+                type: 'doc',
+                icon: '📄',
+                name: 'PROOFCOMPUTE.md',
+                size: '8 KB',
+                cid: 'cid:sha256:doc001'
+            },
+            {
+                type: 'json',
+                icon: '{ }',
+                name: 'financial-ledger.json',
+                size: '2 KB',
+                cid: 'cid:sha256:json001'
+            },
+            {
+                type: 'video',
+                icon: '🎥',
+                name: 'jes-engine-walkthrough.mp4',
+                size: '45 MB',
+                cid: 'cid:sha256:vid002'
+            },
+            {
+                type: 'doc',
+                icon: '📊',
+                name: 'trinity-architecture.pdf',
+                size: '1.2 MB',
+                cid: 'cid:sha256:pdf001'
+            },
+            {
+                type: 'code',
+                icon: '⚙️',
+                name: 'sovereign-transfer.json',
+                size: '1 KB',
+                cid: 'cid:sha256:code001'
+            },
+        ];
+
+        function renderSharedMedia() {
+            const el = document.getElementById('media-grid');
+            if (!el) return;
+            el.innerHTML = SHARED_MEDIA.map(m =>
+                `<div class="media-card" onclick="showCid('${m.cid}')">
+      <div class="media-thumb">
+        <span>${m.icon}</span>
+        <span class="media-overlay">PROVEN</span>
+      </div>
+      <div class="media-info">
+        <div class="media-name">${m.name}</div>
+        <div class="media-meta"><span>${m.size}</span><span style="color:var(--proof-green)">${shortHash(m.cid)}</span></div>
+      </div>
+    </div>`
+            ).join('');
+        }
+
+        function viewShared() {
+            const panel = document.getElementById('shared-files-panel');
+            if (panel) {
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            }
+            renderSharedMedia();
+        }
+
+        async function shareFile() {
+            const name = 'upload-' + Date.now() + '.dat';
+            const hash = await PROOF_ENGINE.sha256(name + Math.random());
+            SHARED_MEDIA.push({
+                type: 'file',
+                icon: '📎',
+                name,
+                size: '1 KB',
+                cid: 'cid:sha256:' + hash.substring(0, 8)
+            });
+            renderSharedMedia();
+            toast('File shared · proof generated', 'success');
+        }
+
+        async function shareVideo() {
+            const name = 'video-' + Date.now() + '.mp4';
+            const hash = await PROOF_ENGINE.sha256(name + Math.random());
+            SHARED_MEDIA.push({
+                type: 'video',
+                icon: '🎥',
+                name,
+                size: '12 MB',
+                cid: 'cid:sha256:' + hash.substring(0, 8)
+            });
+            renderSharedMedia();
+            toast('Video shared · proof generated', 'success');
+        }
+
+        // === COLLABORATION ===
+        function renderCollaborators() {
+            const cursors = document.getElementById('collab-cursors');
+            const list = document.getElementById('collaborator-list');
+            if (cursors) {
+                cursors.innerHTML = COLLABORATORS.map(c =>
+                    `<div class="cursor-avatar" style="background:${c.color}20;border-color:${c.color};color:${c.color}" data-name="${c.name}">${c.initial}</div>`
+                ).join('');
+            }
+            if (list) {
+                list.innerHTML = COLLABORATORS.map(c =>
+                    `<div style="display:flex;align-items:center;gap:10px">
+        <div style="width:8px;height:8px;border-radius:50%;background:${c.color};animation:pulse 2s infinite"></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text)">${c.name}</div>
+        <div style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted)">ONLINE</div>
+      </div>`
+                ).join('');
+            }
+        }
+
+        async function runCollab() {
+            const code = document.getElementById('collab-editor')?.textContent || '';
+            try {
+                const flow = JSON.parse(code);
+                const traceEl = document.getElementById('collab-trace');
+                if (traceEl) traceEl.innerHTML = '<span style="color:var(--muted)">Executing...</span>';
+
+                // Simulate JES step-by-step trace
+                const steps = flow.steps || [];
+                let traceHtml = '';
+                for (let i = 0; i < steps.length; i++) {
+                    const step = steps[i];
+                    const hash = await PROOF_ENGINE.sha256(JSON.stringify(step));
+                    traceHtml += `<div><span style="color:var(--proof-green)">STEP [${i}]</span> <span style="color:var(--ledger-blue)">${step.type}</span> <span style="color:var(--text)">${step.id}</span></div>`;
+                    traceHtml += `<div style="padding-left:16px;color:var(--muted)">hash: ${hash.substring(0,16)}…</div>`;
+                }
+                traceHtml += `<div style="color:var(--proof-green);margin-top:8px">✅ EXECUTION COMPLETE · ${steps.length} steps traced</div>`;
+                if (traceEl) traceEl.innerHTML = traceHtml;
+
+                await addDagBlock('COMPUTE');
+                emitEvent('COMPUTE_EXEC', 'compute', flow.name || 'collab');
+                STATE.computeUnits += steps.length;
+                updateMetrics();
+                toast('Collaborative flow executed', 'success');
+            } catch (e) {
+                toast('Parse error: ' + e.message, 'warn');
+            }
+        }
+
+        function syncCollab() {
+            toast('Syncing with ' + COLLABORATORS.length + ' collaborators...', 'info');
+            setTimeout(() => toast('Sync complete — all nodes agree on state', 'success'), 800);
+        }
+
+        // === NETWORK CANVAS ===
+        function renderNetworkCanvas() {
+            const canvas = document.getElementById('network-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth;
+            const h = canvas.height = canvas.offsetHeight;
+
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, w, h);
+
+            const nodes = NODES_CONFIG.map((n, i) => {
+                const angle = (i / NODES_CONFIG.length) * Math.PI * 2 - Math.PI / 2;
+                const r = Math.min(w, h) * 0.37;
+                return {
+                    ...n,
+                    x: w / 2 + Math.cos(angle) * r,
+                    y: h / 2 + Math.sin(angle) * r
+                };
+            });
+
+            // Draw connections
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    if (Math.random() > 0.3) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = 'rgba(26,26,46,0.8)';
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(nodes[i].x, nodes[i].y);
+                        ctx.lineTo(nodes[j].x, nodes[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Central hub
+            ctx.beginPath();
+            ctx.arc(w / 2, h / 2, 22, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0,255,136,0.1)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(0,255,136,0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = '#00ff88';
+            ctx.font = 'bold 12px IBM Plex Mono';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('CORE', w / 2, h / 2);
+
+            // Hub connections
+            nodes.forEach(n => {
+                ctx.beginPath();
+                ctx.strokeStyle = n.status === 'online' ? 'rgba(0,255,136,0.2)' : 'rgba(255,204,0,0.2)';
+                ctx.lineWidth = 1;
+                ctx.moveTo(w / 2, h / 2);
+                ctx.lineTo(n.x, n.y);
+                ctx.stroke();
+            });
+
+            // Draw nodes
+            nodes.forEach(n => {
+                const col = n.status === 'online' ? '#00ff88' : n.status === 'syncing' ? '#ffcc00' : '#8888aa';
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, 14, 0, Math.PI * 2);
+                ctx.fillStyle = col + '15';
+                ctx.fill();
+                ctx.strokeStyle = col;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.fillStyle = col;
+                ctx.font = 'bold 9px IBM Plex Mono';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(n.id.split('-')[1], n.x, n.y);
+                ctx.fillStyle = 'rgba(232,232,240,0.6)';
+                ctx.font = '8px IBM Plex Mono';
+                ctx.fillText(n.latency + 'ms', n.x, n.y + 20);
+            });
+        }
+
+        // === APP BUILDER ===
+        let draggedComponent = null;
+
+        function dragComponent(e, type) {
+            draggedComponent = type;
+            e.dataTransfer.effectAllowed = 'copy';
+        }
+
+        async function dropComponent(e) {
+            e.preventDefault();
+            if (!draggedComponent) return;
+            const hint = document.getElementById('canvas-hint');
+            if (hint) hint.style.display = 'none';
+
+            const comp = document.createElement('div');
+            comp.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;margin:8px 0;cursor:pointer;display:flex;align-items:center;gap:12px;font-family:IBM Plex Mono,monospace;font-size:12px;color:var(--text);position:relative';
+
+            const COMP_MAP = {
+                'button': {
+                    icon: '🔘',
+                    label: 'Button',
+                    hint: 'onClick → JSONFlow trigger'
+                },
+                'input': {
+                    icon: '📝',
+                    label: 'Input',
+                    hint: 'value → bound to state'
+                },
+                'text': {
+                    icon: 'T',
+                    label: 'Text Block',
+                    hint: 'rendered from state'
+                },
+                'card': {
+                    icon: '▭',
+                    label: 'Card Container',
+                    hint: 'proof-linked display'
+                },
+                'proof-badge': {
+                    icon: '✓',
+                    label: 'Proof Badge',
+                    hint: 'shows live CID'
+                },
+                'cid-display': {
+                    icon: '#',
+                    label: 'CID Display',
+                    hint: 'cid:sha256:...'
+                },
+                'ledger-view': {
+                    icon: '📊',
+                    label: 'Ledger View',
+                    hint: 'real-time entries'
+                },
+                'proof-runner': {
+                    icon: '⚡',
+                    label: 'Proof Runner',
+                    hint: 'executes JSONFlow'
+                },
+                'wallet': {
+                    icon: '💰',
+                    label: 'Wallet Widget',
+                    hint: 'SOVA balance'
+                },
+                'tip-btn': {
+                    icon: '💸',
+                    label: 'Tip Button',
+                    hint: 'payment → proof'
+                },
+                'reward-track': {
+                    icon: '🏆',
+                    label: 'Reward Tracker',
+                    hint: 'staircase tier'
+                },
+                'video-player': {
+                    icon: '🎥',
+                    label: 'Video Player',
+                    hint: 'proof-stored media'
+                },
+                'file-share': {
+                    icon: '📁',
+                    label: 'File Share',
+                    hint: 'IPFS + proof CID'
+                },
+            };
+            const info = COMP_MAP[draggedComponent] || {
+                icon: '⬡',
+                label: draggedComponent,
+                hint: ''
+            };
+
+            const hash = await PROOF_ENGINE.sha256(draggedComponent + Date.now());
+            comp.innerHTML = `
+    <span style="font-size:20px">${info.icon}</span>
+    <div>
+      <div style="font-weight:700">${info.label}</div>
+      <div style="color:var(--muted);font-size:10px">${info.hint}</div>
+      <div style="color:var(--ledger-blue);font-size:9px;margin-top:2px">${hash.substring(0,12)}…</div>
+    </div>
+    <button onclick="this.parentElement.remove();updateCompCount()" style="margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px">✕</button>
+  `;
+            comp.onclick = (ev) => {
+                if (ev.target.tagName !== 'BUTTON') showCompProps(info, hash);
+            };
+
+            document.getElementById('canvas-area').appendChild(comp);
+            STATE.canvasComponents.push({
+                type: draggedComponent,
+                cid: hash
+            });
+            updateCompCount();
+            draggedComponent = null;
+        }
+
+        function updateCompCount() {
+            document.getElementById('comp-count').textContent = document.querySelectorAll('#canvas-area > div:not(#canvas-hint)').length;
+        }
+
+        function clearCanvas() {
+            const area = document.getElementById('canvas-area');
+            [...area.children].forEach(c => {
+                if (c.id !== 'canvas-hint') c.remove();
+            });
+            document.getElementById('canvas-hint').style.display = 'flex';
+            document.getElementById('comp-count').textContent = '0';
+            document.getElementById('app-cid').textContent = 'not deployed';
+            document.getElementById('deploy-status').textContent = 'draft';
+            STATE.canvasComponents = [];
+            toast('Canvas cleared', 'info');
+        }
+
+        function previewApp() {
+            toast('Preview mode — app renders as sovereign HTML', 'info');
+        }
+
+        async function deployApp() {
+            if (!STATE.canvasComponents.length) {
+                toast('Add some components first', 'warn');
+                return;
+            }
+            const appData = {
+                components: STATE.canvasComponents,
+                ts: Date.now()
+            };
+            const cid = 'cid:sha256:' + await PROOF_ENGINE.sha256(JSON.stringify(appData));
+            document.getElementById('app-cid').textContent = shortHash(cid);
+            document.getElementById('deploy-status').textContent = '✅ LIVE';
+            document.getElementById('deploy-status').style.color = 'var(--proof-green)';
+
+            STATE.deployedApps.unshift({
+                name: 'App-' + Date.now(),
+                cid: shortHash(cid),
+                ver: '1.0.0',
+                date: new Date().toISOString().split('T')[0],
+                status: 'live',
+                revenue: '0 SOVA'
+            });
+            renderDeployedApps();
+            toast('App deployed to sovereign mesh · ' + shortHash(cid), 'success');
+        }
+
+        function showCompProps(info, hash) {
+            openModal(info.label + ' · PROPERTIES', `
+    <div class="proof-line" style="margin-bottom:8px"><span class="proof-key">type:</span><span class="proof-val">${info.label}</span></div>
+    <div class="proof-line" style="margin-bottom:8px"><span class="proof-key">hint:</span><span class="proof-val">${info.hint}</span></div>
+    <div class="proof-line" style="margin-bottom:16px"><span class="proof-key">cid:</span><span class="proof-val cid">${hash}</span></div>
+    <div class="input-group"><label>LABEL</label><input type="text" value="${info.label}" style="background:var(--deep);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);width:100%;font-family:'IBM Plex Mono',monospace"></div>
+    <div class="input-group"><label>JSONFLOW BINDING</label><input type="text" placeholder="state.balance" style="background:var(--deep);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);width:100%;font-family:'IBM Plex Mono',monospace"></div>
+    <div class="input-group"><label>ON CHANGE EVENT</label><input type="text" placeholder="emit('set', {key: 'x', value: v})" style="background:var(--deep);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);width:100%;font-family:'IBM Plex Mono',monospace"></div>
+  `);
+        }
+
+        function renderDeployedApps() {
+            const body = document.getElementById('deployed-apps-body');
+            if (!body) return;
+            const all = [...DEPLOYED_APPS_SEED, ...STATE.deployedApps];
+            body.innerHTML = all.map(a =>
+                `<tr>
+      <td style="font-weight:700;color:var(--text)">${a.name}</td>
+      <td class="hash-short">${a.cid}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;color:var(--muted)">${a.ver}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;color:var(--muted)">${a.date}</td>
+      <td><span class="tx-type proof">${a.status.toUpperCase()}</span></td>
+      <td style="color:var(--reward-gold)">${a.revenue}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="toast('Opening app...','info')">OPEN</button></td>
+    </tr>`
+            ).join('');
+        }
+
+        // === ECONOMY ===
+        const STAIR_DETAILS = {
+            1: {
+                name: 'OBSERVER',
+                reqs: ['Generated 10+ proofs', 'Running 1 node'],
+                rewards: ['10 SOVA signup bonus', 'Read access to mesh', 'Basic compute credits']
+            },
+            2: {
+                name: 'VALIDATOR',
+                reqs: ['Verified 100+ proofs', 'Staked ≥ 100 SOVA'],
+                rewards: ['50 SOVA/month', '5% revenue share', 'Vote on proposals']
+            },
+            3: {
+                name: 'PROVER',
+                reqs: ['1,000+ proofs generated', 'Running 2+ nodes', 'Staked ≥ 500 SOVA'],
+                rewards: ['200 SOVA/month', '15% revenue share', 'Priority compute']
+            },
+            4: {
+                name: 'BUILDER',
+                reqs: ['Deployed 1+ app on mesh', '5,000+ proofs', 'Staked ≥ 1,000 SOVA'],
+                rewards: ['1,000 SOVA/month', '25% revenue share', 'Custom reducer registration']
+            },
+            5: {
+                name: 'ARCHITECT',
+                reqs: ['Deployed 3+ apps', '50,000+ proofs', 'Running 3+ nodes'],
+                rewards: ['5,000 SOVA/month', '35% revenue share', 'Governance power']
+            },
+            6: {
+                name: 'SOVEREIGN',
+                reqs: ['Verified 10,000+ proofs', 'Running 3+ full nodes', 'Deployed 5+ apps', 'Staked ≥ 5,000 SOVA'],
+                rewards: ['Unlimited compute credits', '40% revenue share on apps', 'Governance voting rights', 'Priority node placement']
+            },
+        };
+
+        function selectStair(n) {
+            document.querySelectorAll('.stair').forEach((s, i) => s.classList.toggle('active', i === n - 1));
+            const d = STAIR_DETAILS[n];
+            const el = document.getElementById('stair-detail');
+            if (!el || !d) return;
+            el.innerHTML = `
+    <div style="color:var(--reward-gold);font-weight:700;font-size:13px;margin-bottom:8px">${d.name} TIER</div>
+    <div style="color:var(--muted)">Requirements:</div>
+    ${d.reqs.map(r => `<div>· ${r}</div>`).join('')}
+    <div style="margin-top:8px;color:var(--muted)">Rewards:</div>
+    ${d.rewards.map(r => `<div style="color:var(--reward-gold)">· ${r}</div>`).join('')}
+  `;
+        }
+
+        async function claimReward() {
+            const amount = Math.floor(Math.random() * 50) + 10;
+            STATE.walletProof += amount;
+            STATE.walletEarned += amount;
+            const hash = await PROOF_ENGINE.sha256('claim' + Date.now());
+            STATE.revenueStream.unshift({
+                type: 'CLAIM',
+                amount: amount + ' SOVA',
+                from: 'MESH REWARD',
+                cid: shortHash('cid:sha256:' + hash)
+            });
+            renderRevenueStream();
+            updateMetrics();
+            emitEvent('REWARD_ISSUED', 'reward', amount);
+            toast('Claimed ' + amount + ' SOVA', 'success');
+        }
+
+        function stakeTokens() {
+            openModal('STAKE SOVA', `
+    <div class="input-group"><label>AMOUNT TO STAKE</label><input type="number" id="m-stake-amt" value="100" style="background:var(--deep);border:1px solid var(--border);border-radius:6px;padding:10px;color:var(--text);width:100%;font-family:'IBM Plex Mono',monospace"></div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:16px">Available: ${STATE.walletProof.toLocaleString()} SOVA</div>
+    <button class="btn btn-primary" style="width:100%" onclick="confirmStake()">STAKE + LOCK 30 DAYS</button>
+  `);
+        }
+
+        function confirmStake() {
+            const amt = parseInt(document.getElementById('m-stake-amt')?.value) || 0;
+            if (amt > STATE.walletProof) {
+                toast('Insufficient balance', 'warn');
+                return;
+            }
+            STATE.walletProof -= amt;
+            closeModal();
+            updateMetrics();
+            toast('Staked ' + amt + ' SOVA for 30 days', 'success');
+        }
+
+        function buyCompute() {
+            STATE.walletCompute += 500;
+            STATE.walletProof -= 10;
+            updateMetrics();
+            toast('Bought 500 compute credits for 10 SOVA', 'success');
+        }
+
+        function sellCompute() {
+            if (STATE.walletCompute < 100) {
+                toast('Insufficient credits', 'warn');
+                return;
+            }
+            STATE.walletCompute -= 100;
+            STATE.walletProof += 2;
+            updateMetrics();
+            toast('Sold 100 compute credits for 2 SOVA', 'success');
+        }
+
+        function viewEarnings() {
+            toast('Opening earnings history...', 'info');
+        }
+
+        function withdrawFunds() {
+            toast('Connecting to settlement layer...', 'info');
+        }
+
+        const REVENUE_SEED = [{
+                type: 'PROOF',
+                amount: '5 SOVA',
+                from: 'core/ledger run',
+                cid: 'cid:sha256:r001…'
+            },
+            {
+                type: 'APP',
+                amount: '42 SOVA',
+                from: 'ProofCompute Portal',
+                cid: 'cid:sha256:r002…'
+            },
+            {
+                type: 'TIP',
+                amount: '10 SOVA',
+                from: 'anonymous.node',
+                cid: 'cid:sha256:r003…'
+            },
+        ];
+
+        function renderRevenueStream() {
+            const body = document.getElementById('revenue-stream-body');
+            if (!body) return;
+            const all = [...STATE.revenueStream, ...REVENUE_SEED];
+            body.innerHTML = all.slice(0, 10).map(r =>
+                `<tr>
+      <td><span class="tx-type reward">${r.type}</span></td>
+      <td style="color:var(--reward-gold);font-family:'IBM Plex Mono',monospace;font-weight:700">${r.amount}</td>
+      <td style="font-size:11px;color:var(--text)">${r.from}</td>
+      <td class="hash-short">${r.cid}</td>
+    </tr>`
+            ).join('');
+        }
+
+        async function createMonetizationFlow() {
+            toast('JSONFlow monetization schema generated', 'success');
+            await addDagBlock('MONETIZE');
+            emitEvent('REWARD_ISSUED', 'reward', 'monetization');
+        }
+
+        // === UTILITY: MODAL ===
+        function openModal(title, body) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-body').innerHTML = body;
+            document.getElementById('modal-overlay').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('open');
+        }
+
+        function showCid(cid) {
+            openModal('CONTENT IDENTIFIER', `
+    <div class="proof-line" style="margin-bottom:8px"><span class="proof-key">cid:</span></div>
+    <div style="word-break:break-all;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ledger-blue);padding:12px;background:var(--deep);border-radius:8px;margin-bottom:16px">${cid}</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8">
+      This CID uniquely identifies this content.<br>
+      SHA-256 hash of canonical JSON.<br>
+      Verifiable by any node in the mesh.<br>
+      Same input → same CID, always.
+    </div>
+    <button class="btn btn-primary btn-sm" style="margin-top:16px" onclick="navigator.clipboard?.writeText('${cid}');toast('Copied!','info')">COPY CID</button>
+  `);
+        }
+
+        function showBlockDetail(i) {
+            const b = DAG_BLOCKS[i];
+            if (!b) return;
+            showCid('cid:sha256:' + b.hash);
+        }
+
+        function showNodeDetail(id) {
+            const n = NODES_CONFIG.find(x => x.id === id);
+            if (!n) return;
+            openModal('NODE: ' + id, `
+    <div class="proof-line" style="margin-bottom:8px"><span class="proof-key">status:</span><span class="proof-val ${n.status === 'online' ? 'bool-true' : ''}">${n.status.toUpperCase()}</span></div>
+    <div class="proof-line" style="margin-bottom:8px"><span class="proof-key">latency:</span><span class="proof-val num">${n.latency}ms</span></div>
+    <div class="proof-line" style="margin-bottom:8px"><span class="proof-key">role:</span><span class="proof-val">VALIDATOR + PROVER</span></div>
+    <div class="proof-line" style="margin-bottom:8px"><span class="proof-key">proof_count:</span><span class="proof-val num">${Math.floor(Math.random()*1000)+100}</span></div>
+    <div class="proof-line"><span class="proof-key">stake:</span><span class="proof-val" style="color:var(--reward-gold)">${Math.floor(Math.random()*5000)+500} SOVA</span></div>
+  `);
+        }
+
+        // === TOAST ===
+        function toast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'toast ' + type;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transition = 'opacity 0.3s';
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
+        }
+
+        // === PAGE NAVIGATION ===
+        function switchPage(name) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('page-' + name)?.classList.add('active');
+            event?.target?.classList.add('active');
+
+            // Page-specific init
+            if (name === 'collab') {
+                setTimeout(renderNetworkCanvas, 50);
+                renderCollaborators();
+            }
+            if (name === 'messaging') {
+                renderChannels();
+                renderMessages();
+            }
+            if (name === 'proofcompute') {
+                renderReducerRegistry();
+                renderProofHistory();
+            }
+            if (name === 'ledger') {
+                renderFullLedger();
+            }
+            if (name === 'builder') {
+                renderDeployedApps();
+            }
+            if (name === 'economy') {
+                renderRevenueStream();
+            }
+        }
+
+        // === LIVE EVENT GENERATOR ===
+        async function liveEventLoop() {
+            const row = await generateLiveLedgerRow();
+            LIVE_LEDGER_DATA.unshift(row);
+            if (LIVE_LEDGER_DATA.length > 50) LIVE_LEDGER_DATA.pop();
+            updateLiveLedger();
+            emitEvent(row.type, row.color, row.payload);
+
+            // Random: add a dag block
+            if (Math.random() > 0.7) {
+                await addDagBlock(row.type);
+            }
+
+            // Update TPS display
+            STATE.tps = Math.floor(Math.random() * 50 + 80);
+            document.getElementById('tps-rate').textContent = STATE.tps;
+
+            // Occasionally grant reward
+            if (Math.random() > 0.85) {
+                const amt = Math.floor(Math.random() * 10) + 1;
+                STATE.walletProof += amt;
+                STATE.walletEarned += amt;
+            }
+
+            updateMetrics();
+
+            // Update live CIDs
+            if (LIVE_LEDGER_DATA[0]) {
+                document.getElementById('live-input-cid').textContent = 'INPUT · ' + LIVE_LEDGER_DATA[0].cid;
+            }
+
+            setTimeout(liveEventLoop, 800 + Math.random() * 400);
+        }
+
+        // === INIT ===
+        async function init() {
+            await buildEventBar();
+            renderNodeRing();
+            renderReducerRegistry();
+            renderCollaborators();
+            renderChannels();
+            renderMessages();
+            renderDeployedApps();
+            renderRevenueStream();
+            renderSharedMedia();
+            renderFullLedger();
+
+            // Start live event loop
+            liveEventLoop();
+
+            // Initial DAG blocks
+            for (let i = 0; i < 5; i++) {
+                await addDagBlock(['PROOF', 'LEDGER', 'COMPUTE', 'EVENT', 'MERKLE'][i]);
+            }
+
+            // Seed proof count
+            STATE.proofCount = 47;
+            STATE.computeUnits = 312;
+            STATE.walletProof = 235;
+            STATE.walletEarned = 235;
+            updateMetrics();
+
+            // Periodic renders
+            setInterval(renderNetworkCanvas, 4000);
+            setInterval(updateMetrics, 2000);
+
+            toast('SovereignOS initialized — all nodes online', 'success');
+            setTimeout(() => toast('JES engine running · ProofCompute active · Trinity mesh connected', 'info'), 1500);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
